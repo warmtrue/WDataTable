@@ -20,14 +20,16 @@ namespace WDT
             _columns.Add("C");
             _columns.Add("D");
 
-            for (int i = 0; i < 6; i++)
+            for (var i = 0; i < 6; i++)
             {
-                List<object> tdatas = new List<object>();
-                tdatas.Add(i + 1);
-                tdatas.Add("dsada" + i.ToString());
-                tdatas.Add(20.1 + i);
-                tdatas.Add(Random.Range(0.0f, 1.0f));
-                tdatas.Add(new Vector3(1, i, 2));
+                var tdatas = new List<object>
+                {
+                    i + 1,
+                    "dsada" + i.ToString(),
+                    20.1 + i,
+                    Random.Range(0.0f, 1.0f),
+                    new Vector3(1, i, 2)
+                };
                 _datas.Add(tdatas);
             }
 
@@ -41,8 +43,8 @@ namespace WDT
             if (isDynamic)
             {
                 testWDataTable.ColumnBg = Color.Lerp(Color.cyan, Color.magenta, Mathf.Sin(Time.time));
-                testWDataTable.ConfigSize((int) Mathf.Abs(Mathf.Sin(Time.time*2)*50) + 100,
-                    (int) Mathf.Abs(Mathf.Sin(Time.time*3)*20) + 50, -1);
+                testWDataTable.ConfigSize((int) (Mathf.Sin(Time.time*2)*50) + 100,
+                    (int) (Mathf.Sin(Time.time*3)*20) + 50, -1);
                 testWDataTable.ColumnSequence = Color.Lerp(Color.red, Color.yellow, Mathf.Sin(3*Time.time));
                 testWDataTable.SortByIndex(Random.Range(0, 4));
             }

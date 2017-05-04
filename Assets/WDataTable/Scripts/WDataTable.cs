@@ -39,6 +39,7 @@ namespace WDT
         // temp record list
         private List<GameObject> _rowObjectList = new List<GameObject>();
         private List<GameObject> _columnObjectList = new List<GameObject>();
+        private GameObject _columnRowObject = null;
         private List<Image> _columnBgList = new List<Image>();
         private List<Text> _textList = new List<Text>();
         private List<LayoutElement> _layoutList = new List<LayoutElement>();
@@ -130,6 +131,7 @@ namespace WDT
             _datas = new List<IList<object>>(datas);
             _columns = new List<string>(columns);
             _rowObjectList.Clear();
+            _columnRowObject = null;
             _columnObjectList.Clear();
             _columnBgList.Clear();
             _textList.Clear();
@@ -142,12 +144,10 @@ namespace WDT
             _currentSortIndex = -1;
             _isSortSequence = true;
 
-            UpdatePrimarySize();
-
             var columnRowObject = new GameObject("columnRow");
             columnRowObject.AddComponent<HorizontalLayoutGroup>();
             columnRowObject.transform.SetParent(_contentObject.transform);
-            ConfigUIObjectSize(columnRowObject, columns.Count*_itemWidth, _itemHeight);
+            _columnRowObject = columnRowObject;
 
             for (int i = 0; i < columns.Count; i++)
             {
@@ -163,7 +163,6 @@ namespace WDT
             {
                 var rowObject = new GameObject(datas[i][0].ToString());
                 rowObject.AddComponent<HorizontalLayoutGroup>();
-                ConfigUIObjectSize(rowObject, columns.Count*_itemWidth, _itemHeight);
                 rowObject.transform.SetParent(_contentObject.transform);
 
                 for (int j = 0; j < datas[i].Count; j++)
@@ -175,6 +174,8 @@ namespace WDT
                 }
                 _rowObjectList.Add(rowObject);
             }
+
+            UpdateLayoutSize();
         }
 
         // sort by custom column index
@@ -281,9 +282,6 @@ namespace WDT
         private void ConfigLayoutItem(GameObject layoutObject)
         {
             var layoutCom = layoutObject.AddComponent<LayoutElement>();
-            layoutCom.minWidth = _itemWidth;
-            layoutCom.minHeight = _itemHeight;
-
             _layoutList.Add(layoutCom);
         }
 
@@ -339,16 +337,16 @@ namespace WDT
         // for dynamic size update
         private void UpdateLayoutSize()
         {
-            UpdatePrimarySize();
             for (var i = 0; i < _layoutList.Count; i++)
             {
                 _layoutList[i].minWidth = _itemWidth;
                 _layoutList[i].minHeight = _itemHeight;
             }
-        }
 
-        private void UpdatePrimarySize()
-        {
+            ConfigUIObjectSize(_columnRowObject, _columns.Count*_itemWidth, _itemHeight);
+            for (var i = 0; i < _rowObjectList.Count; i++)
+                ConfigUIObjectSize(_rowObjectList[i], _columns.Count*_itemWidth, _itemHeight);
+
             if (_scrollViewObject.gameObject == gameObject)
                 ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth, (_datas.Count + 1)*_itemHeight);
             else
