@@ -6,8 +6,10 @@ namespace WDT
     public class Example : MonoBehaviour
     {
         public WDataTable testWDataTable;
+        public bool isDynamic = false;
         private IList<string> _columns = new List<string>();
         private IList<IList<object>> _datas = new List<IList<object>>();
+
 
         // Use this for initialization
         void Start()
@@ -36,12 +38,14 @@ namespace WDT
         // Update is called once per frame
         void Update()
         {
-            // test dynamic
-            // testWDataTable.ColumnBg = Color.Lerp(Color.cyan, Color.magenta, Mathf.Sin(Time.time));
-            // testWDataTable.ItemWidth = (int)(Mathf.Sin(Time.time * 2) * 50) + 100;
-            // testWDataTable.ItemHeight = (int)(Mathf.Sin(Time.time * 3) * 20) + 50;
-            // testWDataTable.ColumnSequence = Color.Lerp(Color.red, Color.yellow, Mathf.Sin(3*Time.time));
-            // testWDataTable.SortByIndex(Random.Range(0, 4));
+            if (isDynamic)
+            {
+                testWDataTable.ColumnBg = Color.Lerp(Color.cyan, Color.magenta, Mathf.Sin(Time.time));
+                testWDataTable.ItemWidth = (int)(Mathf.Sin(Time.time * 2) * 50) + 100;
+                testWDataTable.ItemHeight = (int)(Mathf.Sin(Time.time * 3) * 20) + 50;
+                testWDataTable.ColumnSequence = Color.Lerp(Color.red, Color.yellow, Mathf.Sin(3 * Time.time));
+                testWDataTable.SortByIndex(Random.Range(0, 4));
+            }
         }
     }
 }

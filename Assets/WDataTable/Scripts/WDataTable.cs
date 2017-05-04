@@ -171,8 +171,7 @@ namespace WDT
             _currentSortIndex = -1;
             _isSortSequence = true;
 
-            ConfigUIObjectSize(_scrollViewObject, columns.Count*_itemWidth + SCROLL_BAR_WIDTH, _tableHeight);
-            ConfigUIObjectSize(_contentObject, columns.Count*_itemWidth, datas.Count*_itemHeight);
+            UpdatePrimarySize();
 
             var columnRowObject = new GameObject("columnRow");
             columnRowObject.AddComponent<HorizontalLayoutGroup>();
@@ -255,8 +254,10 @@ namespace WDT
             _contentObject = tContCom.gameObject;
 
             var tSclCom = GetComponentInChildren<ScrollRect>(true);
-            Assert.IsNotNull(tSclCom);
-            _scrollViewObject = tSclCom.gameObject;
+            if (tSclCom != null)
+                _scrollViewObject = tSclCom.gameObject;
+            else
+                _scrollViewObject = gameObject;
 
             // for default color block
             _defaultColorBlock.highlightedColor = Color.white;
@@ -367,14 +368,21 @@ namespace WDT
         // for dynamic size update
         private void UpdateLayoutSize()
         {
-            ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth + SCROLL_BAR_WIDTH, _tableHeight);
-            ConfigUIObjectSize(_contentObject, _columns.Count*_itemWidth, _datas.Count*_itemHeight);
-
+            UpdatePrimarySize();
             for (var i = 0; i < _layoutList.Count; i++)
             {
                 _layoutList[i].minWidth = _itemWidth;
                 _layoutList[i].minHeight = _itemHeight;
             }
+        }
+
+        private void UpdatePrimarySize()
+        {
+            if (_scrollViewObject.gameObject == gameObject)
+                ConfigUIObjectSize(_scrollViewObject, _columns.Count * _itemWidth, (_datas.Count + 1) * _itemHeight);
+            else
+                ConfigUIObjectSize(_scrollViewObject, _columns.Count * _itemWidth + SCROLL_BAR_WIDTH, _tableHeight);
+            ConfigUIObjectSize(_contentObject, _columns.Count * _itemWidth, _datas.Count * _itemHeight);
         }
 
         private void UpdateTextFont()
