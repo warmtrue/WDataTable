@@ -41,9 +41,9 @@ namespace WDT
             if (isDynamic)
             {
                 testWDataTable.ColumnBg = Color.Lerp(Color.cyan, Color.magenta, Mathf.Sin(Time.time));
-                testWDataTable.ItemWidth = (int)(Mathf.Sin(Time.time * 2) * 50) + 100;
-                testWDataTable.ItemHeight = (int)(Mathf.Sin(Time.time * 3) * 20) + 50;
-                testWDataTable.ColumnSequence = Color.Lerp(Color.red, Color.yellow, Mathf.Sin(3 * Time.time));
+                testWDataTable.ConfigSize((int) Mathf.Abs(Mathf.Sin(Time.time*2)*50) + 100,
+                    (int) Mathf.Abs(Mathf.Sin(Time.time*3)*20) + 50, -1);
+                testWDataTable.ColumnSequence = Color.Lerp(Color.red, Color.yellow, Mathf.Sin(3*Time.time));
                 testWDataTable.SortByIndex(Random.Range(0, 4));
             }
         }

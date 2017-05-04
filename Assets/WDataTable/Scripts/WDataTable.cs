@@ -25,7 +25,7 @@ namespace WDT
         private bool _isSort = true;
         private int _itemWidth = 100;
         private int _itemHeight = 50;
-        private int _tableHeight = 200;
+        private int _scrollHeight = 200;
         private Font _useFont = null;
         private Color _columnBg = Color.gray;
         private Color _columnSequence = Color.green;
@@ -49,7 +49,7 @@ namespace WDT
         private bool _isSortSequence = true;
         private GameObject _contentObject = null;
         private GameObject _scrollViewObject = null;
-        private bool _isBuildUI = false;
+        private bool _isBuildedUI = false;
 
         private const int SCROLL_BAR_WIDTH = 30;
 
@@ -60,46 +60,17 @@ namespace WDT
             set { _isSort = value; }
         }
 
-        public int ItemWidth
+        // -1 for not change
+        public void ConfigSize(int itemWidth, int itemHeight, int scrollHeight)
         {
-            get { return _itemWidth; }
-            set
-            {
-                if (_itemWidth == value)
-                    return;
-
-                _itemWidth = value;
-                if (_isBuildUI)
-                    UpdateLayoutSize();
-            }
-        }
-
-        public int ItemHeight
-        {
-            get { return _itemHeight; }
-            set
-            {
-                if (_itemHeight == value)
-                    return;
-
-                _itemHeight = value;
-                if (_isBuildUI)
-                    UpdateLayoutSize();
-            }
-        }
-
-        public int TableHeight
-        {
-            get { return _tableHeight; }
-            set
-            {
-                if (_tableHeight == value)
-                    return;
-
-                _tableHeight = value;
-                if (_isBuildUI)
-                    UpdateLayoutSize();
-            }
+            if (itemWidth != -1)
+                _itemWidth = itemWidth;
+            if (itemHeight != -1)
+                _itemHeight = itemHeight;
+            if (scrollHeight != -1)
+                _scrollHeight = scrollHeight;
+            if (_isBuildedUI)
+                UpdateLayoutSize();
         }
 
         public Font UseFont
@@ -108,7 +79,7 @@ namespace WDT
             set
             {
                 _useFont = value;
-                if (_isBuildUI)
+                if (_isBuildedUI)
                     UpdateTextFont();
             }
         }
@@ -119,7 +90,7 @@ namespace WDT
             set
             {
                 _columnBg = value;
-                if (_isBuildUI)
+                if (_isBuildedUI)
                     UpdateColumnImage();
             }
         }
@@ -130,7 +101,7 @@ namespace WDT
             set
             {
                 _columnSequence = value;
-                if (_isBuildUI)
+                if (_isBuildedUI)
                     UpdateColumnImage();
             }
         }
@@ -141,7 +112,7 @@ namespace WDT
             set
             {
                 _columnReverse = value;
-                if (_isBuildUI)
+                if (_isBuildedUI)
                     UpdateColumnImage();
             }
         }
@@ -153,7 +124,7 @@ namespace WDT
             if (!CheckInputData(datas, columns))
                 return;
 
-            _isBuildUI = true;
+            _isBuildedUI = true;
 
             // copy
             _datas = new List<IList<object>>(datas);
@@ -379,10 +350,10 @@ namespace WDT
         private void UpdatePrimarySize()
         {
             if (_scrollViewObject.gameObject == gameObject)
-                ConfigUIObjectSize(_scrollViewObject, _columns.Count * _itemWidth, (_datas.Count + 1) * _itemHeight);
+                ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth, (_datas.Count + 1)*_itemHeight);
             else
-                ConfigUIObjectSize(_scrollViewObject, _columns.Count * _itemWidth + SCROLL_BAR_WIDTH, _tableHeight);
-            ConfigUIObjectSize(_contentObject, _columns.Count * _itemWidth, _datas.Count * _itemHeight);
+                ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth + SCROLL_BAR_WIDTH, _scrollHeight);
+            ConfigUIObjectSize(_contentObject, _columns.Count*_itemWidth, _datas.Count*_itemHeight);
         }
 
         private void UpdateTextFont()
