@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -25,7 +26,7 @@ namespace WDT
         private int _itemWidth = 100;
         private int _itemHeight = 50;
         private int _scrollHeight = 200;
-        private Font _useFont = null;
+        private Font _textFont = null;
 
         private Color _columnBgColor = Color.gray;
         private Color _columnSequenceColor = Color.green;
@@ -50,11 +51,11 @@ namespace WDT
         private List<SortItem> _sortItems = new List<SortItem>();
 
         // state
-        private bool _isSelect = true;
-        private bool _isRadioSelect = false;
+        private bool _useSelect = true;
+        private bool _isIsRadioSelect = false;
         private List<int> _selectIndexList = new List<int>();
 
-        private bool _isSort = true;
+        private bool _useSort = true;
         private int _currentSortIndex = -1;
         private bool _isSortSequence = true;
 
@@ -71,45 +72,45 @@ namespace WDT
         }
 
         // dynamic setting
-        public bool Sort
+        public bool useSort
         {
-            get { return _isSort; }
+            get { return _useSort; }
             set
             {
-                if (_isSort == value) return;
-                _isSort = value;
+                if (_useSort == value) return;
+                _useSort = value;
                 RevertSort();
             }
         }
 
-        public bool Select
+        public bool useSelect
         {
-            get { return _isSelect; }
+            get { return _useSelect; }
             set
             {
-                if (_isSelect == value) return;
-                _isSelect = value;
+                if (_useSelect == value) return;
+                _useSelect = value;
                 RevertSelect();
             }
         }
 
-        public bool RadioSelect
+        public bool isRadioSelect
         {
-            get { return _isRadioSelect; }
+            get { return _isIsRadioSelect; }
             set
             {
-                if (_isRadioSelect == value) return;
-                _isRadioSelect = value;
+                if (_isIsRadioSelect == value) return;
+                _isIsRadioSelect = value;
                 RevertSelect();
             }
         }
 
-        public Font UseFont
+        public Font textFont
         {
-            get { return _useFont; }
+            get { return _textFont; }
             set
             {
-                _useFont = value;
+                _textFont = value;
                 if (_isBuildedUi)
                     UpdateTextFont();
             }
@@ -276,7 +277,7 @@ namespace WDT
             var idx = _selectIndexList.IndexOf(index);
             if (idx < 0)
             {
-                if (_isRadioSelect)
+                if (_isIsRadioSelect)
                     _selectIndexList.Clear();
                 _selectIndexList.Add(index);
             }
@@ -309,7 +310,7 @@ namespace WDT
             _rowColorBlock.fadeDuration = 0.2f;
 
             // default arial
-            _useFont = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+            _textFont = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
             _noneNav.mode = Navigation.Mode.None;
         }
 
@@ -372,7 +373,7 @@ namespace WDT
             var textCom = textObject.AddComponent<Text>();
             textCom.text = text;
             textCom.alignment = TextAnchor.MiddleCenter;
-            textCom.font = _useFont;
+            textCom.font = _textFont;
             textCom.raycastTarget = false;
 
             _textList.Add(textCom);
@@ -430,7 +431,7 @@ namespace WDT
         {
             for (var i = 0; i < _textList.Count; i++)
             {
-                _textList[i].font = _useFont;
+                _textList[i].font = _textFont;
             }
         }
 
@@ -455,7 +456,7 @@ namespace WDT
         private void OnClickColumn(int index)
         {
             // Debug.Log("You have clicked the button!" + index);
-            if (_isSort)
+            if (_useSort)
             {
                 SortByIndex(index);
             }
@@ -464,7 +465,7 @@ namespace WDT
         private void OnClickRow(int index)
         {
             Debug.Log("You have clicked the row!" + index);
-            if (_isSelect)
+            if (_useSelect)
             {
                 SelectByIndex(index);
             }

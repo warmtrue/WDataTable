@@ -7,12 +7,11 @@ namespace WDT
     {
         public WDataTable testWDataTable;
         public bool isDynamic = false;
-        public bool isSort = true;
-        public bool isSelect = true;
+        public bool useSort = true;
+        public bool useSelect = true;
         public bool isRadioSelect = true;
         private IList<string> _columns = new List<string>();
         private IList<IList<object>> _datas = new List<IList<object>>();
-
 
         // Use this for initialization
         void Start()
@@ -52,10 +51,9 @@ namespace WDT
                 testWDataTable.SortByIndex(Random.Range(0, 4));
             }
 
-            testWDataTable.Sort = isSort;
-            testWDataTable.Select = isSelect;
-            testWDataTable.RadioSelect = isRadioSelect;
-
+            testWDataTable.useSort = useSort;
+            testWDataTable.useSelect = useSelect;
+            testWDataTable.isRadioSelect = isRadioSelect;
         }
     }
 }
