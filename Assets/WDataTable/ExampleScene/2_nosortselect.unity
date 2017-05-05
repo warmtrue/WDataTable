@@ -537,6 +537,8 @@ MonoBehaviour:
   testWDataTable: {fileID: 569197452}
   isDynamic: 0
   isSort: 0
+  isSelect: 0
+  isRadioSelect: 0
 --- !u!4 &1043768799
 Transform:
   m_ObjectHideFlags: 0

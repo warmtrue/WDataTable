@@ -8,6 +8,8 @@ namespace WDT
         public WDataTable testWDataTable;
         public bool isDynamic = false;
         public bool isSort = true;
+        public bool isSelect = true;
+        public bool isRadioSelect = true;
         private IList<string> _columns = new List<string>();
         private IList<IList<object>> _datas = new List<IList<object>>();
 
@@ -51,6 +53,9 @@ namespace WDT
             }
 
             testWDataTable.Sort = isSort;
+            testWDataTable.Select = isSelect;
+            testWDataTable.RadioSelect = isRadioSelect;
+
         }
     }
 }

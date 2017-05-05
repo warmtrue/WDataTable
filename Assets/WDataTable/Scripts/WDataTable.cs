@@ -22,15 +22,18 @@ namespace WDT
         }
 
         // config
-        private bool _isSort = true;
         private int _itemWidth = 100;
         private int _itemHeight = 50;
         private int _scrollHeight = 200;
         private Font _useFont = null;
-        private Color _columnBg = Color.gray;
-        private Color _columnSequence = Color.green;
-        private Color _columnReverse = Color.red;
-        private ColorBlock _defaultColorBlock = new ColorBlock();
+
+        private Color _columnBgColor = Color.gray;
+        private Color _columnSequenceColor = Color.green;
+        private Color _columnReverseColor = Color.red;
+        private ColorBlock _columnColorBlock = new ColorBlock();
+
+        private Color _rowSelectColor = Color.blue;
+        private ColorBlock _rowColorBlock = new ColorBlock();
 
         // backup data
         private IList<IList<object>> _datas = new List<IList<object>>();
@@ -40,25 +43,65 @@ namespace WDT
         private List<GameObject> _rowObjectList = new List<GameObject>();
         private List<GameObject> _columnObjectList = new List<GameObject>();
         private GameObject _columnRowObject = null;
+        private List<Image> _rowBgList = new List<Image>();
         private List<Image> _columnBgList = new List<Image>();
         private List<Text> _textList = new List<Text>();
         private List<LayoutElement> _layoutList = new List<LayoutElement>();
         private List<SortItem> _sortItems = new List<SortItem>();
 
         // state
+        private bool _isSelect = true;
+        private bool _isRadioSelect = false;
+        private List<int> _selectIndexList = new List<int>();
+
+        private bool _isSort = true;
         private int _currentSortIndex = -1;
         private bool _isSortSequence = true;
+
         private GameObject _contentObject = null;
         private GameObject _scrollViewObject = null;
-        private bool _isBuildedUI = false;
+        private bool _isBuildedUi = false;
+        private Navigation _noneNav = new Navigation();
 
         private const int SCROLL_BAR_WIDTH = 30;
+
+        public IList<int> GetSelectResult()
+        {
+            return _selectIndexList;
+        }
 
         // dynamic setting
         public bool Sort
         {
             get { return _isSort; }
-            set { _isSort = value; }
+            set
+            {
+                if (_isSort == value) return;
+                _isSort = value;
+                RevertSort();
+            }
+        }
+
+        public bool Select
+        {
+            get { return _isSelect; }
+            set
+            {
+                if (_isSelect == value) return;
+                _isSelect = value;
+                RevertSelect();
+            }
+        }
+
+        public bool RadioSelect
+        {
+            get { return _isRadioSelect; }
+            set
+            {
+                if (_isRadioSelect == value) return;
+                _isRadioSelect = value;
+                RevertSelect();
+            }
         }
 
         public Font UseFont
@@ -67,7 +110,7 @@ namespace WDT
             set
             {
                 _useFont = value;
-                if (_isBuildedUI)
+                if (_isBuildedUi)
                     UpdateTextFont();
             }
         }
@@ -81,16 +124,16 @@ namespace WDT
                 _itemHeight = itemHeight;
             if (scrollHeight != -1)
                 _scrollHeight = scrollHeight;
-            if (_isBuildedUI)
+            if (_isBuildedUi)
                 UpdateLayoutSize();
         }
 
         public void ConfigColomnColor(Color columnBg, Color columnSequence, Color columnReverse)
         {
-            _columnBg = columnBg;
-            _columnSequence = columnSequence;
-            _columnReverse = columnReverse;
-            if (_isBuildedUI)
+            _columnBgColor = columnBg;
+            _columnSequenceColor = columnSequence;
+            _columnReverseColor = columnReverse;
+            if (_isBuildedUi)
                 UpdateColumnImage();
         }
 
@@ -101,7 +144,7 @@ namespace WDT
             if (!CheckInputData(datas, columns))
                 return;
 
-            _isBuildedUI = true;
+            _isBuildedUi = true;
 
             // copy
             _datas = new List<IList<object>>(datas);
@@ -109,6 +152,7 @@ namespace WDT
             _rowObjectList.Clear();
             _columnRowObject = null;
             _columnObjectList.Clear();
+            _rowBgList.Clear();
             _columnBgList.Clear();
             _textList.Clear();
             _layoutList.Clear();
@@ -135,13 +179,24 @@ namespace WDT
                 _columnObjectList.Add(columnObject);
             }
 
-            for (int i = 0; i < datas.Count; i++)
+            for (var i = 0; i < datas.Count; i++)
             {
                 var rowObject = new GameObject(datas[i][0].ToString());
                 rowObject.AddComponent<HorizontalLayoutGroup>();
                 rowObject.transform.SetParent(_contentObject.transform);
 
-                for (int j = 0; j < datas[i].Count; j++)
+                var rowBgCom = rowObject.AddComponent<Image>();
+                rowBgCom.color = Color.gray;
+                rowBgCom.raycastTarget = true;
+                _rowBgList.Add(rowBgCom);
+
+                var rowBtnCom = rowObject.AddComponent<Button>();
+                rowBtnCom.colors = _rowColorBlock;
+                rowBtnCom.navigation = _noneNav;
+                var index = i;
+                rowBtnCom.onClick.AddListener(() => { this.OnClickRow(index); });
+
+                for (var j = 0; j < datas[i].Count; j++)
                 {
                     var item = new GameObject("item" + (i + 1) + "_" + (j + 1));
                     item.transform.parent = rowObject.transform;
@@ -152,6 +207,23 @@ namespace WDT
             }
 
             UpdateLayoutSize();
+        }
+
+        // turn back select state
+        public void RevertSelect()
+        {
+            _selectIndexList.Clear();
+            UpdateRowImage();
+        }
+
+        // turn back sort state
+        public void RevertSort()
+        {
+            _currentSortIndex = -1;
+            _isSortSequence = true;
+            UpdateColumnImage();
+            for (var i = 0; i < _rowObjectList.Count; i++)
+                _rowObjectList[i].transform.SetSiblingIndex(i + 1);
         }
 
         // sort by custom column index
@@ -195,6 +267,25 @@ namespace WDT
                 _rowObjectList[_sortItems[i].index].transform.SetSiblingIndex(i + 1);
         }
 
+        // selec by row index
+        public void SelectByIndex(int index)
+        {
+            if (index < 0 || index >= _datas.Count || _datas.Count == 0)
+                return;
+
+            var idx = _selectIndexList.IndexOf(index);
+            if (idx < 0)
+            {
+                if (_isRadioSelect)
+                    _selectIndexList.Clear();
+                _selectIndexList.Add(index);
+            }
+            else
+                _selectIndexList.RemoveAt(idx);
+
+            UpdateRowImage();
+        }
+
         private void Awake()
         {
             var tContCom = GetComponentInChildren<VerticalLayoutGroup>(true);
@@ -202,20 +293,24 @@ namespace WDT
             _contentObject = tContCom.gameObject;
 
             var tSclCom = GetComponentInChildren<ScrollRect>(true);
-            if (tSclCom != null)
-                _scrollViewObject = tSclCom.gameObject;
-            else
-                _scrollViewObject = gameObject;
+            _scrollViewObject = tSclCom != null ? tSclCom.gameObject : gameObject;
 
             // for default color block
-            _defaultColorBlock.highlightedColor = Color.white;
-            _defaultColorBlock.pressedColor = Color.yellow;
-            _defaultColorBlock.colorMultiplier = 1;
-            _defaultColorBlock.normalColor = Color.white;
-            _defaultColorBlock.fadeDuration = 0.2f;
+            _columnColorBlock.highlightedColor = Color.green;
+            _columnColorBlock.normalColor = Color.white;
+            _columnColorBlock.pressedColor = Color.white;
+            _columnColorBlock.colorMultiplier = 1;
+            _columnColorBlock.fadeDuration = 0.2f;
+
+            _rowColorBlock.highlightedColor = Color.green;
+            _rowColorBlock.normalColor = Color.white;
+            _rowColorBlock.pressedColor = Color.white;
+            _rowColorBlock.colorMultiplier = 1;
+            _rowColorBlock.fadeDuration = 0.2f;
 
             // default arial
             _useFont = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+            _noneNav.mode = Navigation.Mode.None;
         }
 
         private bool CheckInputData(IList<IList<object>> datas, IList<string> columns)
@@ -297,14 +392,15 @@ namespace WDT
             rTrans.pivot = new Vector2(0.5f, 0.5f);
 
             var bgCom = bgObject.AddComponent<Image>();
-            bgCom.color = _columnBg;
+            bgCom.color = _columnBgColor;
             bgCom.raycastTarget = true;
 
             var index = -1;
             int.TryParse(parentObject.name.Substring(6), out index);
 
             var btnCom = bgObject.AddComponent<Button>();
-            btnCom.colors = _defaultColorBlock;
+            btnCom.colors = _columnColorBlock;
+            btnCom.navigation = _noneNav;
             btnCom.onClick.AddListener(() => { this.OnClickColumn(index); });
 
             _columnBgList.Add(bgCom);
@@ -342,9 +438,17 @@ namespace WDT
         {
             for (var i = 0; i < _columnBgList.Count; i++)
             {
-                _columnBgList[i].color = _columnBg;
+                _columnBgList[i].color = _columnBgColor;
                 if (i == _currentSortIndex)
-                    _columnBgList[i].color = _isSortSequence ? _columnSequence : _columnReverse;
+                    _columnBgList[i].color = _isSortSequence ? _columnSequenceColor : _columnReverseColor;
+            }
+        }
+
+        private void UpdateRowImage()
+        {
+            for (var i = 0; i < _rowBgList.Count; i++)
+            {
+                _rowBgList[i].color = _selectIndexList.IndexOf(i) >= 0 ? _rowSelectColor : Color.gray;
             }
         }
 
@@ -354,6 +458,15 @@ namespace WDT
             if (_isSort)
             {
                 SortByIndex(index);
+            }
+        }
+
+        private void OnClickRow(int index)
+        {
+            Debug.Log("You have clicked the row!" + index);
+            if (_isSelect)
+            {
+                SelectByIndex(index);
             }
         }
     }
