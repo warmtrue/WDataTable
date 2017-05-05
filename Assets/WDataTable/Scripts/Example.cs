@@ -46,9 +46,11 @@ namespace WDT
             {
                 testWDataTable.ConfigColomnColor(Color.Lerp(Color.cyan, Color.magenta, Mathf.Sin(Time.time)),
                     Color.Lerp(Color.red, Color.yellow, Mathf.Sin(3*Time.time)), Color.red);
-                testWDataTable.ConfigSize((int) (Mathf.Sin(Time.time*2)*100) + 100,
-                    (int) (Mathf.Sin(Time.time*3)*50) + 50, -1);
+                testWDataTable.ConfigSize((int) (Mathf.Sin(Time.time*2)*50) + 100,
+                    (int) (Mathf.Sin(Time.time*3)*20) + 50, -1);
                 testWDataTable.SortByIndex(Random.Range(0, 4));
+
+                testWDataTable.ConfigSelectColor(Color.Lerp(Color.cyan, Color.magenta, Mathf.Sin(2*Time.time)));
             }
 
             testWDataTable.useSort = useSort;

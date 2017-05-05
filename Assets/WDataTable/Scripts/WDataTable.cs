@@ -41,19 +41,18 @@ namespace WDT
         private IList<string> _columns = new List<string>();
 
         // temp record list
-        private List<GameObject> _rowObjectList = new List<GameObject>();
-        private List<GameObject> _columnObjectList = new List<GameObject>();
+        private readonly List<GameObject> _rowObjectList = new List<GameObject>();
         private GameObject _columnRowObject = null;
-        private List<Image> _rowBgList = new List<Image>();
-        private List<Image> _columnBgList = new List<Image>();
-        private List<Text> _textList = new List<Text>();
-        private List<LayoutElement> _layoutList = new List<LayoutElement>();
-        private List<SortItem> _sortItems = new List<SortItem>();
+        private readonly List<Image> _rowBgList = new List<Image>();
+        private readonly List<Image> _columnBgList = new List<Image>();
+        private readonly List<Text> _textList = new List<Text>();
+        private readonly List<LayoutElement> _layoutList = new List<LayoutElement>();
+        private readonly List<SortItem> _sortItems = new List<SortItem>();
 
         // state
         private bool _useSelect = true;
         private bool _isIsRadioSelect = false;
-        private List<int> _selectIndexList = new List<int>();
+        private readonly List<int> _selectIndexList = new List<int>();
 
         private bool _useSort = true;
         private int _currentSortIndex = -1;
@@ -61,10 +60,11 @@ namespace WDT
 
         private GameObject _contentObject = null;
         private GameObject _scrollViewObject = null;
-        private bool _isBuildedUi = false;
-        private Navigation _noneNav = new Navigation();
+        private bool _isBuildedTable = false;
+        private Navigation _noneNavi = new Navigation();
 
         private const int SCROLL_BAR_WIDTH = 30;
+        private const int COLUMN_BLANK_DIST = 6;
 
         public IList<int> GetSelectResult()
         {
@@ -111,12 +111,13 @@ namespace WDT
             set
             {
                 _textFont = value;
-                if (_isBuildedUi)
-                    UpdateTextFont();
+                if (_isBuildedTable)
+                    _UpdateTextFont();
             }
         }
 
         // -1 for not change
+        // config size info
         public void ConfigSize(int itemWidth, int itemHeight, int scrollHeight)
         {
             if (itemWidth != -1)
@@ -125,34 +126,42 @@ namespace WDT
                 _itemHeight = itemHeight;
             if (scrollHeight != -1)
                 _scrollHeight = scrollHeight;
-            if (_isBuildedUi)
-                UpdateLayoutSize();
+            if (_isBuildedTable)
+                _UpdateLayoutSize();
         }
 
-        public void ConfigColomnColor(Color columnBg, Color columnSequence, Color columnReverse)
+        // config Colomn color info
+        public void ConfigColomnColor(Color columnBgColor, Color columnSequenceColor, Color columnReverseColor)
         {
-            _columnBgColor = columnBg;
-            _columnSequenceColor = columnSequence;
-            _columnReverseColor = columnReverse;
-            if (_isBuildedUi)
-                UpdateColumnImage();
+            _columnBgColor = columnBgColor;
+            _columnSequenceColor = columnSequenceColor;
+            _columnReverseColor = columnReverseColor;
+            if (_isBuildedTable)
+                _UpdateColumnImage();
+        }
+
+        // config select Color
+        public void ConfigSelectColor(Color rowSelectColor)
+        {
+            _rowSelectColor = rowSelectColor;
+            if (_isBuildedTable)
+                _UpdateRowImage();
         }
 
         // init data
         // need ensure right data
         public void InitDataTable(IList<IList<object>> datas, IList<string> columns)
         {
-            if (!CheckInputData(datas, columns))
+            if (!_CheckInputData(datas, columns))
                 return;
 
-            _isBuildedUi = true;
+            _isBuildedTable = true;
 
             // copy
             _datas = new List<IList<object>>(datas);
             _columns = new List<string>(columns);
             _rowObjectList.Clear();
             _columnRowObject = null;
-            _columnObjectList.Clear();
             _rowBgList.Clear();
             _columnBgList.Clear();
             _textList.Clear();
@@ -164,20 +173,21 @@ namespace WDT
 
             _currentSortIndex = -1;
             _isSortSequence = true;
+            _selectIndexList.Clear();
 
+            // create ui component
             var columnRowObject = new GameObject("columnRow");
             columnRowObject.AddComponent<HorizontalLayoutGroup>();
             columnRowObject.transform.SetParent(_contentObject.transform);
             _columnRowObject = columnRowObject;
 
-            for (int i = 0; i < columns.Count; i++)
+            for (var i = 0; i < columns.Count; i++)
             {
                 var columnObject = new GameObject("column" + i);
                 columnObject.transform.SetParent(columnRowObject.transform);
-                ConfigLayoutItem(columnObject);
-                ConfigColumnBgObject(columnObject);
-                ConfigTextObject(columnObject, columns[i]);
-                _columnObjectList.Add(columnObject);
+                _ConfigLayoutItem(columnObject);
+                _ConfigColumnBgObject(columnObject);
+                _ConfigTextObject(columnObject, columns[i]);
             }
 
             for (var i = 0; i < datas.Count; i++)
@@ -193,28 +203,28 @@ namespace WDT
 
                 var rowBtnCom = rowObject.AddComponent<Button>();
                 rowBtnCom.colors = _rowColorBlock;
-                rowBtnCom.navigation = _noneNav;
+                rowBtnCom.navigation = _noneNavi;
                 var index = i;
-                rowBtnCom.onClick.AddListener(() => { this.OnClickRow(index); });
+                rowBtnCom.onClick.AddListener(() => { _OnClickRow(index); });
 
                 for (var j = 0; j < datas[i].Count; j++)
                 {
                     var item = new GameObject("item" + (i + 1) + "_" + (j + 1));
                     item.transform.parent = rowObject.transform;
-                    ConfigLayoutItem(item);
-                    ConfigTextObject(item, datas[i][j].ToString());
+                    _ConfigLayoutItem(item);
+                    _ConfigTextObject(item, datas[i][j].ToString());
                 }
                 _rowObjectList.Add(rowObject);
             }
 
-            UpdateLayoutSize();
+            _UpdateLayoutSize();
         }
 
         // turn back select state
         public void RevertSelect()
         {
             _selectIndexList.Clear();
-            UpdateRowImage();
+            _UpdateRowImage();
         }
 
         // turn back sort state
@@ -222,7 +232,7 @@ namespace WDT
         {
             _currentSortIndex = -1;
             _isSortSequence = true;
-            UpdateColumnImage();
+            _UpdateColumnImage();
             for (var i = 0; i < _rowObjectList.Count; i++)
                 _rowObjectList[i].transform.SetSiblingIndex(i + 1);
         }
@@ -244,7 +254,7 @@ namespace WDT
                 _isSortSequence = true;
             }
 
-            UpdateColumnImage();
+            _UpdateColumnImage();
 
             for (var i = 0; i < _datas.Count; i++)
             {
@@ -284,7 +294,7 @@ namespace WDT
             else
                 _selectIndexList.RemoveAt(idx);
 
-            UpdateRowImage();
+            _UpdateRowImage();
         }
 
         private void Awake()
@@ -311,10 +321,10 @@ namespace WDT
 
             // default arial
             _textFont = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
-            _noneNav.mode = Navigation.Mode.None;
+            _noneNavi.mode = Navigation.Mode.None;
         }
 
-        private bool CheckInputData(IList<IList<object>> datas, IList<string> columns)
+        private bool _CheckInputData(IList<IList<object>> datas, IList<string> columns)
         {
             if (columns.Count == 0 || datas.Count == 0)
             {
@@ -344,20 +354,20 @@ namespace WDT
             return true;
         }
 
-        private void ConfigUIObjectSize(GameObject uiObject, int width, int height)
+        private void _ConfigUIObjectSize(GameObject uiObject, int width, int height)
         {
             var rTrans = uiObject.GetComponent<RectTransform>();
             rTrans.sizeDelta = new Vector2(width, height);
         }
 
 
-        private void ConfigLayoutItem(GameObject layoutObject)
+        private void _ConfigLayoutItem(GameObject layoutObject)
         {
             var layoutCom = layoutObject.AddComponent<LayoutElement>();
             _layoutList.Add(layoutCom);
         }
 
-        private void ConfigTextObject(GameObject parentObject, string text)
+        private void _ConfigTextObject(GameObject parentObject, string text)
         {
             var textObject = new GameObject("text", typeof(RectTransform));
             textObject.transform.SetParent(parentObject.transform);
@@ -379,14 +389,14 @@ namespace WDT
             _textList.Add(textCom);
         }
 
-        private void ConfigColumnBgObject(GameObject parentObject)
+        private void _ConfigColumnBgObject(GameObject parentObject)
         {
             var bgObject = new GameObject("bg", typeof(RectTransform));
             bgObject.transform.SetParent(parentObject.transform);
 
             var rTrans = bgObject.GetComponent<RectTransform>();
             rTrans.anchoredPosition = Vector2.zero;
-            rTrans.sizeDelta = new Vector2(-6, -6);
+            rTrans.sizeDelta = new Vector2(-COLUMN_BLANK_DIST, -COLUMN_BLANK_DIST);
 
             rTrans.anchorMin = Vector2.zero;
             rTrans.anchorMax = Vector2.one;
@@ -401,14 +411,14 @@ namespace WDT
 
             var btnCom = bgObject.AddComponent<Button>();
             btnCom.colors = _columnColorBlock;
-            btnCom.navigation = _noneNav;
-            btnCom.onClick.AddListener(() => { this.OnClickColumn(index); });
+            btnCom.navigation = _noneNavi;
+            btnCom.onClick.AddListener(() => { _OnClickColumn(index); });
 
             _columnBgList.Add(bgCom);
         }
 
         // for dynamic size update
-        private void UpdateLayoutSize()
+        private void _UpdateLayoutSize()
         {
             for (var i = 0; i < _layoutList.Count; i++)
             {
@@ -416,18 +426,18 @@ namespace WDT
                 _layoutList[i].minHeight = _itemHeight;
             }
 
-            ConfigUIObjectSize(_columnRowObject, _columns.Count*_itemWidth, _itemHeight);
+            _ConfigUIObjectSize(_columnRowObject, _columns.Count*_itemWidth, _itemHeight);
             for (var i = 0; i < _rowObjectList.Count; i++)
-                ConfigUIObjectSize(_rowObjectList[i], _columns.Count*_itemWidth, _itemHeight);
+                _ConfigUIObjectSize(_rowObjectList[i], _columns.Count*_itemWidth, _itemHeight);
 
             if (_scrollViewObject.gameObject == gameObject)
-                ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth, (_datas.Count + 1)*_itemHeight);
+                _ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth, (_datas.Count + 1)*_itemHeight);
             else
-                ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth + SCROLL_BAR_WIDTH, _scrollHeight);
-            ConfigUIObjectSize(_contentObject, _columns.Count*_itemWidth, _datas.Count*_itemHeight);
+                _ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth + SCROLL_BAR_WIDTH, _scrollHeight);
+            _ConfigUIObjectSize(_contentObject, _columns.Count*_itemWidth, _datas.Count*_itemHeight);
         }
 
-        private void UpdateTextFont()
+        private void _UpdateTextFont()
         {
             for (var i = 0; i < _textList.Count; i++)
             {
@@ -435,7 +445,7 @@ namespace WDT
             }
         }
 
-        private void UpdateColumnImage()
+        private void _UpdateColumnImage()
         {
             for (var i = 0; i < _columnBgList.Count; i++)
             {
@@ -445,30 +455,24 @@ namespace WDT
             }
         }
 
-        private void UpdateRowImage()
+        private void _UpdateRowImage()
         {
             for (var i = 0; i < _rowBgList.Count; i++)
-            {
                 _rowBgList[i].color = _selectIndexList.IndexOf(i) >= 0 ? _rowSelectColor : Color.gray;
-            }
         }
 
-        private void OnClickColumn(int index)
+        private void _OnClickColumn(int index)
         {
             // Debug.Log("You have clicked the button!" + index);
             if (_useSort)
-            {
                 SortByIndex(index);
-            }
         }
 
-        private void OnClickRow(int index)
+        private void _OnClickRow(int index)
         {
-            Debug.Log("You have clicked the row!" + index);
+            // Debug.Log("You have clicked the row!" + index);
             if (_useSelect)
-            {
                 SelectByIndex(index);
-            }
         }
     }
 }
