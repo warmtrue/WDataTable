@@ -7,6 +7,7 @@ namespace WDT
     {
         public WDataTable testWDataTable;
         public bool isDynamic = false;
+        public bool isSort = true;
         private IList<string> _columns = new List<string>();
         private IList<IList<object>> _datas = new List<IList<object>>();
 
@@ -42,12 +43,14 @@ namespace WDT
         {
             if (isDynamic)
             {
-                testWDataTable.ColumnBg = Color.Lerp(Color.cyan, Color.magenta, Mathf.Sin(Time.time));
-                testWDataTable.ConfigSize((int) (Mathf.Sin(Time.time*2)*50) + 100,
-                    (int) (Mathf.Sin(Time.time*3)*20) + 50, -1);
-                testWDataTable.ColumnSequence = Color.Lerp(Color.red, Color.yellow, Mathf.Sin(3*Time.time));
+                testWDataTable.ConfigColomnColor(Color.Lerp(Color.cyan, Color.magenta, Mathf.Sin(Time.time)),
+                    Color.Lerp(Color.red, Color.yellow, Mathf.Sin(3*Time.time)), Color.red);
+                testWDataTable.ConfigSize((int) (Mathf.Sin(Time.time*2)*100) + 100,
+                    (int) (Mathf.Sin(Time.time*3)*50) + 50, -1);
                 testWDataTable.SortByIndex(Random.Range(0, 4));
             }
+
+            testWDataTable.Sort = isSort;
         }
     }
 }

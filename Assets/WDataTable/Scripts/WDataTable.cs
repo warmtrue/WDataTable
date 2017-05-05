@@ -61,6 +61,17 @@ namespace WDT
             set { _isSort = value; }
         }
 
+        public Font UseFont
+        {
+            get { return _useFont; }
+            set
+            {
+                _useFont = value;
+                if (_isBuildedUI)
+                    UpdateTextFont();
+            }
+        }
+
         // -1 for not change
         public void ConfigSize(int itemWidth, int itemHeight, int scrollHeight)
         {
@@ -74,48 +85,13 @@ namespace WDT
                 UpdateLayoutSize();
         }
 
-        public Font UseFont
+        public void ConfigColomnColor(Color columnBg, Color columnSequence, Color columnReverse)
         {
-            get { return _useFont; }
-            set
-            {
-                _useFont = value;
-                if (_isBuildedUI)
-                    UpdateTextFont();
-            }
-        }
-
-        public Color ColumnBg
-        {
-            get { return _columnBg; }
-            set
-            {
-                _columnBg = value;
-                if (_isBuildedUI)
-                    UpdateColumnImage();
-            }
-        }
-
-        public Color ColumnSequence
-        {
-            get { return _columnSequence; }
-            set
-            {
-                _columnSequence = value;
-                if (_isBuildedUI)
-                    UpdateColumnImage();
-            }
-        }
-
-        public Color ColumnReverse
-        {
-            get { return _columnReverse; }
-            set
-            {
-                _columnReverse = value;
-                if (_isBuildedUI)
-                    UpdateColumnImage();
-            }
+            _columnBg = columnBg;
+            _columnSequence = columnSequence;
+            _columnReverse = columnReverse;
+            if (_isBuildedUI)
+                UpdateColumnImage();
         }
 
         // init data
