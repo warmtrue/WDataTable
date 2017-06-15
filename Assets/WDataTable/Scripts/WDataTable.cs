@@ -8,6 +8,10 @@ using UnityEngine.UI;
 
 namespace WDT
 {
+    /// <summary>
+    /// Data table ui compoent
+    /// </summary>
+    /// <seealso cref="UnityEngine.MonoBehaviour" />
     public class WDataTable : MonoBehaviour
     {
         private class SortItem
@@ -66,12 +70,22 @@ namespace WDT
         private const int SCROLL_BAR_WIDTH = 30;
         private const int COLUMN_BLANK_DIST = 6;
 
+        /// <summary>
+        /// Gets the select result.
+        /// </summary>
+        /// <returns></returns>
         public IList<int> GetSelectResult()
         {
             return _selectIndexList;
         }
 
         // dynamic setting
+        /// <summary>
+        /// Gets or sets a value indicating whether [use sort].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [use sort]; otherwise, <c>false</c>.
+        /// </value>
         public bool useSort
         {
             get { return _useSort; }
@@ -83,6 +97,12 @@ namespace WDT
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether [use select].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [use select]; otherwise, <c>false</c>.
+        /// </value>
         public bool useSelect
         {
             get { return _useSelect; }
@@ -94,6 +114,12 @@ namespace WDT
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is radio select.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is radio select; otherwise, <c>false</c>.
+        /// </value>
         public bool isRadioSelect
         {
             get { return _isIsRadioSelect; }
@@ -105,6 +131,12 @@ namespace WDT
             }
         }
 
+        /// <summary>
+        /// Gets or sets the text font.
+        /// </summary>
+        /// <value>
+        /// The text font.
+        /// </value>
         public Font textFont
         {
             get { return _textFont; }
@@ -116,8 +148,13 @@ namespace WDT
             }
         }
 
-        // -1 for not change
         // config size info
+        /// <summary>
+        /// Configurations the size.-1 for not change
+        /// </summary>
+        /// <param name="itemWidth">Width of the item.</param>
+        /// <param name="itemHeight">Height of the item.</param>
+        /// <param name="scrollHeight">Height of the scroll.</param>
         public void ConfigSize(int itemWidth, int itemHeight, int scrollHeight)
         {
             if (itemWidth != -1)
@@ -130,7 +167,12 @@ namespace WDT
                 _UpdateLayoutSize();
         }
 
-        // config Colomn color info
+        /// <summary>
+        /// Configurations the color of the colomn. 
+        /// </summary>
+        /// <param name="columnBgColor">Color of the column bg.</param>
+        /// <param name="columnSequenceColor">Color of the column sequence.</param>
+        /// <param name="columnReverseColor">Color of the column reverse.</param>
         public void ConfigColomnColor(Color columnBgColor, Color columnSequenceColor, Color columnReverseColor)
         {
             _columnBgColor = columnBgColor;
@@ -140,7 +182,10 @@ namespace WDT
                 _UpdateColumnImage();
         }
 
-        // config select Color
+        /// <summary>
+        /// Configurations the color of the select.
+        /// </summary>
+        /// <param name="rowSelectColor">Color of the row select.</param>
         public void ConfigSelectColor(Color rowSelectColor)
         {
             _rowSelectColor = rowSelectColor;
@@ -148,8 +193,11 @@ namespace WDT
                 _UpdateRowImage();
         }
 
-        // init data
-        // need ensure right data
+        /// <summary>
+        /// Initializes the data table. need ensure right data
+        /// </summary>
+        /// <param name="datas">The datas.</param>
+        /// <param name="columns">The columns.</param>
         public void InitDataTable(IList<IList<object>> datas, IList<string> columns)
         {
             if (!_CheckInputData(datas, columns))
@@ -220,14 +268,18 @@ namespace WDT
             _UpdateLayoutSize();
         }
 
-        // turn back select state
+        /// <summary>
+        /// Reverts the select.
+        /// </summary>
         public void RevertSelect()
         {
             _selectIndexList.Clear();
             _UpdateRowImage();
         }
 
-        // turn back sort state
+        /// <summary>
+        /// Reverts the sort.
+        /// </summary>
         public void RevertSort()
         {
             _currentSortIndex = -1;
@@ -237,7 +289,10 @@ namespace WDT
                 _rowObjectList[i].transform.SetSiblingIndex(i + 1);
         }
 
-        // sort by custom column index
+        /// <summary>
+        /// Sorts the index of the by.
+        /// </summary>
+        /// <param name="index">The index.</param>
         public void SortByIndex(int index)
         {
             if (index < 0 || index >= _columns.Count)
@@ -278,7 +333,10 @@ namespace WDT
                 _rowObjectList[_sortItems[i].index].transform.SetSiblingIndex(i + 1);
         }
 
-        // selec by row index
+        /// <summary>
+        /// Selects the index of the by.
+        /// </summary>
+        /// <param name="index">The index.</param>
         public void SelectByIndex(int index)
         {
             if (index < 0 || index >= _datas.Count || _datas.Count == 0)
