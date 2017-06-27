@@ -12,6 +12,7 @@ namespace WDT
         public bool isRadioSelect = true;
         private IList<string> _columns = new List<string>();
         private IList<IList<object>> _datas = new List<IList<object>>();
+        private IList<IDictionary<string, object>> _datasDict = new List<IDictionary<string, object>>();
 
         // Use this for initialization
         void Start()
@@ -32,11 +33,22 @@ namespace WDT
                     Random.Range(0.0f, 1.0f),
                     new Vector3(1, i, 2)
                 };
+
+                var tdatasDict = new Dictionary<string, object>();
+
+                tdatasDict.Add("ID", i + 1);
+                tdatasDict.Add("A", "dsada" + i.ToString());
+                tdatasDict.Add("B", 20.1 + i);
+                tdatasDict.Add("f", Random.Range(0.0f, 1.0f));
+                tdatasDict.Add("D", new Vector3(1, i, 2));
+
                 _datas.Add(tdatas);
+                _datasDict.Add(tdatasDict);
             }
 
             // init 
-            testWDataTable.InitDataTable(_datas, _columns);
+            // testWDataTable.InitDataTable(_datas, _columns);
+            testWDataTable.InitDataTable(_datasDict, _columns);
         }
 
         // Update is called once per frame

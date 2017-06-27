@@ -198,6 +198,26 @@ namespace WDT
         /// </summary>
         /// <param name="datas">The datas.</param>
         /// <param name="columns">The columns.</param>
+        public void InitDataTable(IList<IDictionary<string, object>> datas, IList<string> columns)
+        {
+            IList<IList<object>> newDatas = new List<IList<object>>();
+            for (int i = 0; i < datas.Count; i++)
+            {
+                IList<object> subData = new List<object>();
+                for (int j = 0; j < columns.Count; j++)
+                {
+                    subData.Add(datas[i].ContainsKey(columns[j]) ? datas[i][columns[j]] : null);
+                }
+                newDatas.Add(subData);
+            }
+            InitDataTable(newDatas, columns);
+        }
+
+        /// <summary>
+        /// Initializes the data table. need ensure right data
+        /// </summary>
+        /// <param name="datas">The datas.</param>
+        /// <param name="columns">The columns.</param>
         public void InitDataTable(IList<IList<object>> datas, IList<string> columns)
         {
             if (!_CheckInputData(datas, columns))
@@ -216,7 +236,7 @@ namespace WDT
             _layoutList.Clear();
             _sortItems.Clear();
 
-            for (var i = 0; i < datas.Count; i++)
+            for (int i = 0; i < datas.Count; i++)
                 _sortItems.Add(new SortItem(0, null));
 
             _currentSortIndex = -1;
@@ -229,7 +249,7 @@ namespace WDT
             columnRowObject.transform.SetParent(_contentObject.transform);
             _columnRowObject = columnRowObject;
 
-            for (var i = 0; i < columns.Count; i++)
+            for (int i = 0; i < columns.Count; i++)
             {
                 var columnObject = new GameObject("column" + i);
                 columnObject.transform.SetParent(columnRowObject.transform);
@@ -238,7 +258,7 @@ namespace WDT
                 _ConfigTextObject(columnObject, columns[i]);
             }
 
-            for (var i = 0; i < datas.Count; i++)
+            for (int i = 0; i < datas.Count; i++)
             {
                 var rowObject = new GameObject(datas[i][0].ToString());
                 rowObject.AddComponent<HorizontalLayoutGroup>();
@@ -252,15 +272,15 @@ namespace WDT
                 var rowBtnCom = rowObject.AddComponent<Button>();
                 rowBtnCom.colors = _rowColorBlock;
                 rowBtnCom.navigation = _noneNavi;
-                var index = i;
+                int index = i;
                 rowBtnCom.onClick.AddListener(() => { _OnClickRow(index); });
 
-                for (var j = 0; j < datas[i].Count; j++)
+                for (int j = 0; j < datas[i].Count; j++)
                 {
                     var item = new GameObject("item" + (i + 1) + "_" + (j + 1));
                     item.transform.parent = rowObject.transform;
                     _ConfigLayoutItem(item);
-                    _ConfigTextObject(item, datas[i][j].ToString());
+                    _ConfigTextObject(item, datas[i][j] == null ? "" : datas[i][j].ToString());
                 }
                 _rowObjectList.Add(rowObject);
             }
@@ -342,7 +362,7 @@ namespace WDT
             if (index < 0 || index >= _datas.Count || _datas.Count == 0)
                 return;
 
-            var idx = _selectIndexList.IndexOf(index);
+            int idx = _selectIndexList.IndexOf(index);
             if (idx < 0)
             {
                 if (_isIsRadioSelect)
@@ -403,8 +423,18 @@ namespace WDT
             {
                 for (var j = 0; j < datas.Count - 1; j++)
                 {
+                    if ((datas[j][i] == null) || (datas[j + 1][i] == null))
+                    {
+                        if ((datas[j][i] == null) && (datas[j + 1][i] == null))
+                            continue;
+
+                        Debug.LogError("data type not same:[" + j + "," + i + "], [" + (j + 1) + "," + i + "]");
+                        return false;
+                    }
+
                     if (datas[j][i].GetType() == datas[j + 1][i].GetType())
                         continue;
+
                     Debug.LogError("data type not same:[" + j + "," + i + "], [" + (j + 1) + "," + i + "]");
                     return false;
                 }
@@ -464,7 +494,7 @@ namespace WDT
             bgCom.color = _columnBgColor;
             bgCom.raycastTarget = true;
 
-            var index = -1;
+            int index = -1;
             int.TryParse(parentObject.name.Substring(6), out index);
 
             var btnCom = bgObject.AddComponent<Button>();
