@@ -1,15 +1,43 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace WDT
 {
     public class Example : MonoBehaviour
     {
+        [System.Serializable]
+        public class TestInfo
+        {
+            public int ID;
+            public string A;
+            public double B;
+            public float C;
+            public Vector3 D;
+        }
+
+        [System.Serializable]
+        public class TestInfoList
+        {
+            public TestInfo[] data;
+        }
+
+        public enum LoadDataType
+        {
+            ListArrayType,
+            DictArrayType,
+            JsonType,
+        }
+
         public WDataTable testWDataTable;
         public bool isDynamic = false;
         public bool useSort = true;
         public bool useSelect = true;
         public bool isRadioSelect = true;
+
+        public LoadDataType loadType = LoadDataType.ListArrayType;
+
         private IList<string> _columns = new List<string>();
         private IList<IList<object>> _datas = new List<IList<object>>();
         private IList<IDictionary<string, object>> _datasDict = new List<IDictionary<string, object>>();
@@ -23,32 +51,65 @@ namespace WDT
             _columns.Add("C");
             _columns.Add("D");
 
-            for (var i = 0; i < 6; i++)
-            {
-                var tdatas = new List<object>
-                {
-                    i + 1,
-                    "dsada" + i.ToString(),
-                    20.1 + i,
-                    Random.Range(0.0f, 1.0f),
-                    new Vector3(1, i, 2)
-                };
-
-                var tdatasDict = new Dictionary<string, object>();
-
-                tdatasDict.Add("ID", i + 1);
-                tdatasDict.Add("A", "dsada" + i.ToString());
-                tdatasDict.Add("B", 20.1 + i);
-                tdatasDict.Add("f", Random.Range(0.0f, 1.0f));
-                tdatasDict.Add("D", new Vector3(1, i, 2));
-
-                _datas.Add(tdatas);
-                _datasDict.Add(tdatasDict);
-            }
-
             // init 
-            // testWDataTable.InitDataTable(_datas, _columns);
-            testWDataTable.InitDataTable(_datasDict, _columns);
+            switch (loadType)
+            {
+                case LoadDataType.ListArrayType:
+                case LoadDataType.DictArrayType:
+                    for (int i = 0; i < 6; i++)
+                    {
+                        var tdatas = new List<object>
+                        {
+                            i + 1,
+                            "dsada" + i.ToString(),
+                            20.1 + i,
+                            Random.Range(0.0f, 1.0f),
+                            new Vector3(1, i, 2)
+                        };
+
+                        var tdatasDict = new Dictionary<string, object>
+                        {
+                            {"ID", i + 1},
+                            {"A", "dsada" + i.ToString()},
+                            {"B", 20.1 + i},
+                            {"C", Random.Range(0.0f, 1.0f)},
+                            {"D", new Vector3(1, i, 2)}
+                        };
+
+                        _datas.Add(tdatas);
+                        _datasDict.Add(tdatasDict);
+                    }
+                    if (loadType == LoadDataType.ListArrayType)
+                        testWDataTable.InitDataTable(_datas, _columns);
+                    else
+                        testWDataTable.InitDataTable(_datasDict, _columns);
+                    break;
+                case LoadDataType.JsonType:
+                    var textAsset = Resources.Load("TestJson") as TextAsset;
+                    if (textAsset == null)
+                        Debug.LogError("Not found TestJson.json in Resources Directory");
+                    else
+                    {
+                        var testInfoList = JsonUtility.FromJson<TestInfoList>(textAsset.text);
+                        for (int i = 0; i < testInfoList.data.Length; i++)
+                        {
+                            TestInfo ti = testInfoList.data[i];
+                            var tdatas = new List<object>
+                            {
+                                ti.ID,
+                                ti.A,
+                                ti.B,
+                                ti.C,
+                                ti.D,
+                            };
+                            _datas.Add(tdatas);
+                        }
+                        testWDataTable.InitDataTable(_datas, _columns);
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         // Update is called once per frame

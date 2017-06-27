@@ -535,6 +535,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testWDataTable: {fileID: 569197452}
+  isDynamic: 0
+  useSort: 1
+  useSelect: 1
+  isRadioSelect: 1
+  loadType: 2
 --- !u!4 &1043768799
 Transform:
   m_ObjectHideFlags: 0
