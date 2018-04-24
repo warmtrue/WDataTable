@@ -246,13 +246,13 @@ namespace WDT
             // create ui component
             var columnRowObject = new GameObject("columnRow");
             columnRowObject.AddComponent<HorizontalLayoutGroup>();
-            columnRowObject.transform.SetParent(_contentObject.transform);
+            columnRowObject.transform.SetParent(_contentObject.transform, false);
             _columnRowObject = columnRowObject;
 
             for (int i = 0; i < columns.Count; i++)
             {
                 var columnObject = new GameObject("column" + i);
-                columnObject.transform.SetParent(columnRowObject.transform);
+                columnObject.transform.SetParent(columnRowObject.transform, false);
                 _ConfigLayoutItem(columnObject);
                 _ConfigColumnBgObject(columnObject);
                 _ConfigTextObject(columnObject, columns[i]);
@@ -262,7 +262,7 @@ namespace WDT
             {
                 var rowObject = new GameObject(datas[i][0].ToString());
                 rowObject.AddComponent<HorizontalLayoutGroup>();
-                rowObject.transform.SetParent(_contentObject.transform);
+                rowObject.transform.SetParent(_contentObject.transform, false);
 
                 var rowBgCom = rowObject.AddComponent<Image>();
                 rowBgCom.color = Color.gray;
@@ -278,7 +278,7 @@ namespace WDT
                 for (int j = 0; j < datas[i].Count; j++)
                 {
                     var item = new GameObject("item" + (i + 1) + "_" + (j + 1));
-                    item.transform.parent = rowObject.transform;
+                    item.transform.SetParent(rowObject.transform, false);
                     _ConfigLayoutItem(item);
                     _ConfigTextObject(item, datas[i][j] == null ? "" : datas[i][j].ToString());
                 }
@@ -458,7 +458,7 @@ namespace WDT
         private void _ConfigTextObject(GameObject parentObject, string text)
         {
             var textObject = new GameObject("text", typeof(RectTransform));
-            textObject.transform.SetParent(parentObject.transform);
+            textObject.transform.SetParent(parentObject.transform, false);
 
             var rTrans = textObject.GetComponent<RectTransform>();
             rTrans.anchoredPosition = Vector2.zero;
@@ -480,7 +480,7 @@ namespace WDT
         private void _ConfigColumnBgObject(GameObject parentObject)
         {
             var bgObject = new GameObject("bg", typeof(RectTransform));
-            bgObject.transform.SetParent(parentObject.transform);
+            bgObject.transform.SetParent(parentObject.transform, false);
 
             var rTrans = bgObject.GetComponent<RectTransform>();
             rTrans.anchoredPosition = Vector2.zero;
@@ -502,6 +502,7 @@ namespace WDT
             btnCom.navigation = _noneNavi;
             btnCom.onClick.AddListener(() => { _OnClickColumn(index); });
 
+            bgObject.transform.SetParent(parentObject.transform, false);
             _columnBgList.Add(bgCom);
         }
 
