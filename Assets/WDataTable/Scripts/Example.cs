@@ -31,6 +31,7 @@ namespace WDT
         }
 
         public WDataTable testWDataTable;
+        public TextAsset jsonExample;
         public bool isDynamic = false;
         public bool useSort = true;
         public bool useSelect = true;
@@ -85,12 +86,11 @@ namespace WDT
                         testWDataTable.InitDataTable(_datasDict, _columns);
                     break;
                 case LoadDataType.JsonType:
-                    var textAsset = Resources.Load("TestJson") as TextAsset;
-                    if (textAsset == null)
-                        Debug.LogError("Not found TestJson.json in Resources Directory");
+                    if (jsonExample == null)
+                        Debug.LogError("Not found TestJson.json");
                     else
                     {
-                        var testInfoList = JsonUtility.FromJson<TestInfoList>(textAsset.text);
+                        var testInfoList = JsonUtility.FromJson<TestInfoList>(jsonExample.text);
                         for (int i = 0; i < testInfoList.data.Length; i++)
                         {
                             TestInfo ti = testInfoList.data[i];

@@ -8,12 +8,23 @@ using UnityEngine.UI;
 
 namespace WDT
 {
+    public enum WEventType
+    {
+        SelectRow,
+        SortColumn,
+        EventCount,
+    }
+
+    public delegate void WMsgHandle(WEventType messageType, params object[] args);
+
     /// <summary>
     /// Data table ui compoent
     /// </summary>
     /// <seealso cref="UnityEngine.MonoBehaviour" />
     public class WDataTable : MonoBehaviour
     {
+        public event WMsgHandle MsgHandle;
+
         private class SortItem
         {
             public SortItem(int indexIn, object itemIn)
@@ -208,8 +219,10 @@ namespace WDT
                 {
                     subData.Add(datas[i].ContainsKey(columns[j]) ? datas[i][columns[j]] : null);
                 }
+
                 newDatas.Add(subData);
             }
+
             InitDataTable(newDatas, columns);
         }
 
@@ -282,6 +295,7 @@ namespace WDT
                     _ConfigLayoutItem(item);
                     _ConfigTextObject(item, datas[i][j] == null ? "" : datas[i][j].ToString());
                 }
+
                 _rowObjectList.Add(rowObject);
             }
 
@@ -351,6 +365,9 @@ namespace WDT
 
             for (var i = 0; i < _sortItems.Count; i++)
                 _rowObjectList[_sortItems[i].index].transform.SetSiblingIndex(i + 1);
+
+            if (MsgHandle != null)
+                MsgHandle(WEventType.SortColumn);
         }
 
         /// <summary>
@@ -373,6 +390,9 @@ namespace WDT
                 _selectIndexList.RemoveAt(idx);
 
             _UpdateRowImage();
+
+            if (MsgHandle != null)
+                MsgHandle(WEventType.SelectRow);
         }
 
         private void Awake()
@@ -439,6 +459,7 @@ namespace WDT
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -515,15 +536,15 @@ namespace WDT
                 _layoutList[i].minHeight = _itemHeight;
             }
 
-            _ConfigUIObjectSize(_columnRowObject, _columns.Count*_itemWidth, _itemHeight);
+            _ConfigUIObjectSize(_columnRowObject, _columns.Count * _itemWidth, _itemHeight);
             for (var i = 0; i < _rowObjectList.Count; i++)
-                _ConfigUIObjectSize(_rowObjectList[i], _columns.Count*_itemWidth, _itemHeight);
+                _ConfigUIObjectSize(_rowObjectList[i], _columns.Count * _itemWidth, _itemHeight);
 
             if (_scrollViewObject.gameObject == gameObject)
-                _ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth, (_datas.Count + 1)*_itemHeight);
+                _ConfigUIObjectSize(_scrollViewObject, _columns.Count * _itemWidth, (_datas.Count + 1) * _itemHeight);
             else
-                _ConfigUIObjectSize(_scrollViewObject, _columns.Count*_itemWidth + SCROLL_BAR_WIDTH, _scrollHeight);
-            _ConfigUIObjectSize(_contentObject, _columns.Count*_itemWidth, _datas.Count*_itemHeight);
+                _ConfigUIObjectSize(_scrollViewObject, _columns.Count * _itemWidth + SCROLL_BAR_WIDTH, _scrollHeight);
+            _ConfigUIObjectSize(_contentObject, _columns.Count * _itemWidth, _datas.Count * _itemHeight);
         }
 
         private void _UpdateTextFont()

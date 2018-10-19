@@ -387,12 +387,12 @@ Prefab:
     - target: {fileID: 224453855919909426, guid: d5fb2390dbb30794f889b5de560a236c,
         type: 2}
       propertyPath: m_AnchorMax.y
-      value: 0.5
+      value: 0.83262086
       objectReference: {fileID: 0}
     - target: {fileID: 224605363614824514, guid: d5fb2390dbb30794f889b5de560a236c,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 100.256096
+      value: 100.278305
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d5fb2390dbb30794f889b5de560a236c, type: 2}
@@ -563,3 +563,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testWDataTable: {fileID: 722049733}
+  jsonExample: {fileID: 4900000, guid: d57c4e609e4f6b844b8d9b08496a941d, type: 3}
+  isDynamic: 0
+  useSort: 1
+  useSelect: 1
+  isRadioSelect: 1
+  loadType: 0

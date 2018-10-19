@@ -535,6 +535,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testWDataTable: {fileID: 569197452}
+  jsonExample: {fileID: 4900000, guid: d57c4e609e4f6b844b8d9b08496a941d, type: 3}
   isDynamic: 0
   useSort: 1
   useSelect: 1

@@ -535,10 +535,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testWDataTable: {fileID: 569197452}
+  jsonExample: {fileID: 4900000, guid: d57c4e609e4f6b844b8d9b08496a941d, type: 3}
   isDynamic: 0
-  isSort: 0
-  isSelect: 0
+  useSort: 0
+  useSelect: 0
   isRadioSelect: 0
+  loadType: 0
 --- !u!4 &1043768799
 Transform:
   m_ObjectHideFlags: 0
