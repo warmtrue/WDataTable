@@ -8,8 +8,10 @@ WDataTable
 
 WDataTable, a table UI component for Unity3D.
 
-![screenshot](http://oi9iyrpv0.bkt.clouddn.com/1.png)
-![screenshot](http://oi9iyrpv0.bkt.clouddn.com/table1.gif)
+
+![screenshot](Images/tmp.png)
+![screenshot](Images/button.png)
+![screenshot](Images/table1.gif)
 
 
 ## Feature
@@ -20,14 +22,18 @@ WDataTable, a table UI component for Unity3D.
 # 2.0
 * Use [LoopScrollRect](https://github.com/qiankanglai/LoopScrollRect) for performance
 * Table Element Pool Support
-* Custom Column Config
+* Custom Column Style Config
 * Handle Table Message
-* Support Text Mesh Pro
+* Support TextMesh Pro
+* Per Element Click and Config
 
 ## Requirement
 * Unity 2018.2+
 * No other SDK are required.
 
+## Notice
+* If use TextMesh Pro, need Import TMP Essential Resources
+* Use can be found in the demo scene
 
 ## License
 MIT
