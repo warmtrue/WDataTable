@@ -9,7 +9,7 @@ WDataTable
 WDataTable, a table UI component for Unity3D.
 
 ![screenshot](http://oi9iyrpv0.bkt.clouddn.com/1.png)
-![screenshot](http://oi9iyrpv0.bkt.clouddn.com/1.gif)
+![screenshot](http://oi9iyrpv0.bkt.clouddn.com/table1.gif)
 
 
 ## Feature
@@ -17,7 +17,7 @@ WDataTable, a table UI component for Unity3D.
 * Sort by Column
 * Select Row
 * Dynamic Update
-2.0
+# 2.0
 * Use [LoopScrollRect](https://github.com/qiankanglai/LoopScrollRect) for performance
 * Table Element Pool Support
 * Custom Column Config
