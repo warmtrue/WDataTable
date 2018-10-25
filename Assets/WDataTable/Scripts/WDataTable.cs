@@ -286,6 +286,7 @@ namespace WDT
                 rowBtnCom.colors = _rowColorBlock;
                 rowBtnCom.navigation = _noneNavi;
                 int index = i;
+                rowBtnCom.onClick.RemoveAllListeners();
                 rowBtnCom.onClick.AddListener(() => { _OnClickRow(index); });
 
                 for (int j = 0; j < datas[i].Count; j++)
@@ -521,6 +522,7 @@ namespace WDT
             var btnCom = bgObject.AddComponent<Button>();
             btnCom.colors = _columnColorBlock;
             btnCom.navigation = _noneNavi;
+            btnCom.onClick.RemoveAllListeners();
             btnCom.onClick.AddListener(() => { _OnClickColumn(index); });
 
             bgObject.transform.SetParent(parentObject.transform, false);
