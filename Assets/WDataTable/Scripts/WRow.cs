@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace WDT
@@ -47,7 +48,12 @@ namespace WDT
             }
 
             m_button.onClick.RemoveAllListeners();
-            m_button.onClick.AddListener(() => { bindDataTable.OnClickRow(rei.rowIndex); });
+            m_button.onClick.AddListener(() =>
+            {
+                bindDataTable.OnClickRow(rei.rowIndex);
+                if (!bindDataTable.isUseSelect)
+                    EventSystem.current.SetSelectedGameObject(null);
+            });
         }
     }
 }

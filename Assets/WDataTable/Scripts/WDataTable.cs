@@ -53,6 +53,8 @@ namespace WDT
         public int itemHeight;
         public int tableWidth;
         public int tableHeight;
+        public bool isUseSort = true;
+        public bool isUseSelect = true;
         private bool m_init;
         private WHead m_head;
         private LoopVerticalScrollRect m_scrollRect;
@@ -151,7 +153,9 @@ namespace WDT
 
         public void OnClickColumn(int columnIndex)
         {
-            SortByIndex(columnIndex);
+            if (isUseSort)
+                SortByIndex(columnIndex);
+
             Debug.Log("clicked columnIndex " + columnIndex);
             if (MsgHandle != null)
                 MsgHandle(WEventType.SELECT_COLUMN, columnIndex);
@@ -170,6 +174,7 @@ namespace WDT
                 MsgHandle(WEventType.INIT_ELEMENT, rowIndex, columnIndex, element);
         }
 
+        [ContextMenu("UpdateSize")]
         public void UpdateSize()
         {
             if (!m_init)
