@@ -69,6 +69,34 @@ namespace WDT
 
         #region public
 
+        public LoopVerticalScrollRect GetLoopScrollRect()
+        {
+            return m_scrollRect;
+        }
+
+        public float GetPositionByNewSize(float oldPosition, int oldCount, int newCount)
+        {
+            float offset = oldPosition * (itemHeight * oldCount - tableHeight);
+            float newPosition = offset / (itemHeight * newCount - tableHeight);
+            return newPosition;
+        }
+
+        public float GetPosition()
+        {
+            if (m_scrollRect == null)
+                return 0;
+
+            return m_scrollRect.verticalNormalizedPosition;
+        }
+
+        public void SetPosition(float position)
+        {
+            if (m_scrollRect == null)
+                return;
+
+            m_scrollRect.verticalNormalizedPosition = position;
+        }
+
         /// <summary>
         /// Sorts the index of the by.
         /// </summary>

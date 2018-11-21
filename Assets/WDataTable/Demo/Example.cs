@@ -8,10 +8,12 @@ public class Example : MonoBehaviour
 {
     public WDataTable dataTable;
     public bool testDynamic;
+    public Text text;
 
     private IList<string> m_columns = null;
     private List<IList<object>> m_datas = null;
     private List<WColumnDef> m_columnDefs = null;
+    private int m_tempSelectIndex = -1;
 
     // Use this for initialization
     void Start()
@@ -53,13 +55,20 @@ public class Example : MonoBehaviour
                 return;
             text.color = columnIndex % 2 == 0 ? Color.blue : Color.red;
         }
+        else if (messageType == WEventType.SELECT_ROW)
+        {
+            int rowIndex = (int) args[0];
+            if (text != null)
+                text.text = "Select Row" + rowIndex;
+            m_tempSelectIndex = rowIndex;
+        }
     }
 
-    private List<object> GetRandomData(int i = 0)
+    private List<object> GetRandomData(int i = -1)
     {
         return new List<object>
         {
-            i + 1,
+            i,
             "dsada" + i,
             20.1 + i,
             Random.Range(0.0f, 1.0f),
@@ -88,6 +97,22 @@ public class Example : MonoBehaviour
         dataTable.UpdateData(m_datas, null);
     }
 
+    public void RemoveSelectRow()
+    {
+        if (m_datas.Count == 0)
+            return;
+
+        if (m_tempSelectIndex < 0 || m_tempSelectIndex >= m_datas.Count)
+            return;
+
+        int oldSize = m_datas.Count;
+        float oldPostion = dataTable.GetPosition();
+        m_datas.RemoveAt(m_tempSelectIndex);
+        int newSize = m_datas.Count;
+        dataTable.UpdateData(m_datas, null);
+        dataTable.SetPosition(dataTable.GetPositionByNewSize(oldPostion, oldSize, newSize));
+    }
+
     public void RemoveColumn(int index)
     {
         if (m_columns.Count == 0)
@@ -95,9 +120,7 @@ public class Example : MonoBehaviour
 
         m_columns.RemoveAt(index);
         foreach (var subData in m_datas)
-        {
             subData.RemoveAt(index);
-        }
 
         dataTable.UpdateData(m_datas, m_columns);
     }
