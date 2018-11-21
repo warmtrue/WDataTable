@@ -9,38 +9,34 @@ public class Example : MonoBehaviour
     public WDataTable dataTable;
     public bool testDynamic;
 
+    private IList<string> m_columns = null;
+    private List<IList<object>> m_datas = null;
+    private List<WColumnDef> m_columnDefs = null;
+
     // Use this for initialization
     void Start()
     {
-        IList<string> columns = new List<string>();
-        IList<IList<object>> datas = new List<IList<object>>();
-        columns.Add("ID");
-        columns.Add("A");
-        columns.Add("B");
-        columns.Add("C");
-        columns.Add("D");
-        IList<WColumnDef> columnDefs = new List<WColumnDef>();
-        columnDefs.Add(new WColumnDef() {width = "40"});
-        columnDefs.Add(null);
-        columnDefs.Add(null);
-        columnDefs.Add(null);
-        columnDefs.Add(new WColumnDef() {width = "50%", disableSort = true});
+        m_columns = new List<string>();
+        m_datas = new List<IList<object>>();
+        m_columns.Add("ID");
+        m_columns.Add("A");
+        m_columns.Add("B");
+        m_columns.Add("C");
+        m_columns.Add("D");
+        m_columnDefs = new List<WColumnDef>();
+        m_columnDefs.Add(new WColumnDef() {width = "40"});
+        m_columnDefs.Add(null);
+        m_columnDefs.Add(null);
+        m_columnDefs.Add(null);
+        m_columnDefs.Add(new WColumnDef() {width = "50%", disableSort = true});
 
-        for (int i = 0; i < 120; i++)
+        for (int i = 0; i < 30; i++)
         {
-            var tdatas = new List<object>
-            {
-                i + 1,
-                "dsada" + i,
-                20.1 + i,
-                Random.Range(0.0f, 1.0f),
-                new Vector3(1, i, 2)
-            };
-            datas.Add(tdatas);
+            m_datas.Add(GetRandomData(i));
         }
 
         dataTable.MsgHandle += HandleTableEvent;
-        dataTable.InitDataTable(datas, columns, columnDefs);
+        dataTable.InitDataTable(m_datas, m_columns, m_columnDefs);
     }
 
     public void HandleTableEvent(WEventType messageType, params object[] args)
@@ -59,23 +55,54 @@ public class Example : MonoBehaviour
         }
     }
 
+    private List<object> GetRandomData(int i = 0)
+    {
+        return new List<object>
+        {
+            i + 1,
+            "dsada" + i,
+            20.1 + i,
+            Random.Range(0.0f, 1.0f),
+            new Vector3(1, i, 2)
+        };
+    }
+
     public void AddRow()
     {
-
+        m_datas.Add(GetRandomData());
+        dataTable.UpdateData(m_datas, null);
     }
 
     public void InsertRow(int index)
     {
-
+        m_datas.Insert(index, GetRandomData());
+        dataTable.UpdateData(m_datas, null);
     }
 
     public void RemoveRow(int index)
     {
+        if (m_datas.Count == 0)
+            return;
 
+        m_datas.RemoveAt(index);
+        dataTable.UpdateData(m_datas, null);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void RemoveColumn(int index)
+    {
+        if (m_columns.Count == 0)
+            return;
+
+        m_columns.RemoveAt(index);
+        foreach (var subData in m_datas)
+        {
+            subData.RemoveAt(index);
+        }
+
+        dataTable.UpdateData(m_datas, m_columns);
+    }
+
+    private void Update()
     {
         if (!testDynamic)
             return;
