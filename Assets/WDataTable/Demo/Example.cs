@@ -59,6 +59,21 @@ public class Example : MonoBehaviour
         }
     }
 
+    public void AddRow()
+    {
+
+    }
+
+    public void InsertRow(int index)
+    {
+
+    }
+
+    public void RemoveRow(int index)
+    {
+
+    }
+
     // Update is called once per frame
     void Update()
     {

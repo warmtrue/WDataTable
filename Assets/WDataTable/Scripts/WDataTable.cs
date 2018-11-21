@@ -104,6 +104,54 @@ namespace WDT
         }
 
         /// <summary>
+        /// update data of the data table. need ensure right data
+        /// </summary>
+        /// <param name="datas">The datas.</param>
+        /// <param name="columns">The columns.</param>
+        public void UpdateData(IList<IList<object>> datas, IList<string> columns)
+        {
+            if (datas == null && columns == null)
+                return;
+
+            if (!m_init)
+            {
+                Debug.LogError("not init data table");
+                return;
+            }
+
+            IList<IList<object>> tDatas = datas;
+            IList<string> tColumns = columns;
+            if (tDatas == null)
+                tDatas = m_datas;
+
+            if (tColumns == null)
+                tColumns = m_columns;
+
+            if (!CheckInputData(tDatas, tColumns, null))
+                return;
+
+            if (!CheckConfig())
+                return;
+
+            if (datas != null)
+            {
+                m_datas = datas;
+                m_rowInfos.Clear();
+                for (int i = 0; i < m_datas.Count; i++)
+                    m_rowInfos.Add(new RowElementInfo {rowIndex = i, bindDataTable = this});
+            }
+
+            if (columns != null)
+            {
+                m_columns = new List<string>(columns);
+                UpdateColumnWidths();
+                m_head.SetColumnInfo(m_columns, this);
+            }
+
+            UpdateByRowInfo();
+        }
+
+        /// <summary>
         /// Initializes the data table. need ensure right data
         /// </summary>
         /// <param name="datas">The datas.</param>

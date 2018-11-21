@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿#if WDT_USE_TMPRO
+// define WDT_USE_TMPRO if use text mesh pro for datatable elemenet
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -32,3 +34,4 @@ namespace WDT
         }
     }
 }
+#endif
