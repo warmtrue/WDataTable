@@ -16,7 +16,9 @@ namespace WDT
         protected virtual void InitContainter(string prefabName)
         {
             m_prefabName = prefabName;
-            SG.ResourceManager.Instance.InitPool(m_prefabName, 0);
+            //SG.ResourceManager.Instance.InitPool(m_prefabName, 0);
+            SG.ResourceManager.Instance.InitPool("ButtonElement", 0);
+            SG.ResourceManager.Instance.InitPool("TextElement", 0);
             foreach (Transform child in transform)
                 DestroyImmediate(child.gameObject);
             init = true;
@@ -30,12 +32,14 @@ namespace WDT
 
             for (int i = 0; i < columnSize; i++)
             {
-                GameObject go = SG.ResourceManager.Instance.GetObjectFromPool(m_prefabName);
+                GameObject go = SG.ResourceManager.Instance.GetObjectFromPool(GetElemType(i));
                 go.transform.SetParent(transform, false);
                 WElement element = go.GetComponent<WElement>();
                 Assert.IsNotNull(element);
                 elements.Add(element);
             }
         }
+
+        internal abstract string GetElemType(int i);
     }
 }

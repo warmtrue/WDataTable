@@ -20,17 +20,12 @@ public class Example : MonoBehaviour
     {
         m_columns = new List<string>();
         m_datas = new List<IList<object>>();
-        m_columns.Add("ID");
-        m_columns.Add("A");
-        m_columns.Add("B");
-        m_columns.Add("C");
-        m_columns.Add("D");
         m_columnDefs = new List<WColumnDef>();
-        m_columnDefs.Add(new WColumnDef() {width = "40"});
-        m_columnDefs.Add(null);
-        m_columnDefs.Add(null);
-        m_columnDefs.Add(null);
-        m_columnDefs.Add(new WColumnDef() {width = "50%", disableSort = true});
+        m_columnDefs.Add(new WColumnDef() { name = "ID", width = "40"});
+        m_columnDefs.Add(new WColumnDef() { name = "A", elemType = ElemType.BUTTON});
+        m_columnDefs.Add(new WColumnDef() { name = "B" });
+        m_columnDefs.Add(new WColumnDef() { name = "C" });
+        m_columnDefs.Add(new WColumnDef() { name = "D", width = "50%", disableSort = true});
 
         for (int i = 0; i < 30; i++)
         {
@@ -38,7 +33,7 @@ public class Example : MonoBehaviour
         }
 
         dataTable.MsgHandle += HandleTableEvent;
-        dataTable.InitDataTable(m_datas, m_columns, m_columnDefs);
+        dataTable.InitDataTable(m_datas, m_columnDefs);
     }
 
     public void HandleTableEvent(WEventType messageType, params object[] args)
