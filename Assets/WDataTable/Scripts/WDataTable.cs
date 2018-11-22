@@ -17,9 +17,17 @@ namespace WDT
         EVENT_COUNT,
     }
 
+    public enum ElemType
+    {
+        BUTTON,
+        TEXT,
+    }
+
     public class WColumnDef
     {
-        public string width;
+        public string name;
+        public ElemType elemType = ElemType.TEXT;
+        public string width = "";
         public bool disableSort;
     }
 
@@ -43,6 +51,19 @@ namespace WDT
 
             public readonly int rowIndex;
             public readonly object item;
+        }
+
+        internal string GetColumnType(int i)
+        {
+            switch(m_columnDefs[i].elemType)
+            {
+                case ElemType.BUTTON:
+                    return "ButtonElement";
+                case ElemType.TEXT:
+                    return "TextElement";
+                default:
+                    throw new ArgumentException();
+            }
         }
 
         [HideInInspector] public event WMsgHandle MsgHandle;
@@ -155,7 +176,7 @@ namespace WDT
             if (tColumns == null)
                 tColumns = m_columns;
 
-            if (!CheckInputData(tDatas, tColumns, null))
+            if (!CheckInputData(tDatas, m_columnDefs))
                 return;
 
             if (!CheckConfig())
@@ -185,10 +206,9 @@ namespace WDT
         /// <param name="datas">The datas.</param>
         /// <param name="columns">The columns.</param>
         /// <param name="columnDefs"></param>
-        public void InitDataTable(IList<IList<object>> datas, IList<string> columns,
-            IList<WColumnDef> columnDefs = null)
+        public void InitDataTable(IList<IList<object>> datas, IList<WColumnDef> columnDefs = null)
         {
-            if (!CheckInputData(datas, columns, columnDefs))
+            if (!CheckInputData(datas, columnDefs))
                 return;
 
             if (!CheckConfig())
@@ -203,7 +223,8 @@ namespace WDT
             m_rowInfos.Clear();
             for (int i = 0; i < m_datas.Count; i++)
                 m_rowInfos.Add(new RowElementInfo {rowIndex = i, bindDataTable = this});
-            m_columns = new List<string>(columns);
+            m_columns = (from x in m_columnDefs
+                         select x.name).ToList();
 
             UpdateColumnWidths();
             m_head.SetColumnInfo(m_columns, this);
@@ -402,34 +423,24 @@ namespace WDT
             return true;
         }
 
-        private static bool CheckInputData(IList<IList<object>> datas, ICollection<string> columns,
-            ICollection<WColumnDef> columnDefs)
+        private static bool CheckInputData(IList<IList<object>> datas, ICollection<WColumnDef> columnDefs)
         {
-            if (columns.Count == 0 || datas.Count == 0)
+            if (datas.Count == 0)
             {
                 Debug.LogError("empty data");
                 return false;
             }
 
-            if (columnDefs != null)
-            {
-                if (columnDefs.Count != columns.Count)
-                {
-                    Debug.LogError("columnDefs count not equal columns.Count");
-                    return false;
-                }
-            }
-
             for (int i = 0; i < datas.Count; i++)
             {
-                if (datas[i].Count != columns.Count)
+                if (datas[i].Count != columnDefs.Count)
                 {
                     Debug.LogError("row data length not equal columns length:" + i);
                     return false;
                 }
             }
 
-            for (int i = 0; i < columns.Count; i++)
+            for (int i = 0; i < columnDefs.Count; i++)
             {
                 for (int j = 0; j < datas.Count - 1; j++)
                 {

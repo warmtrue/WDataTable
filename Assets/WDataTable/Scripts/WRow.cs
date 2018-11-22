@@ -23,6 +23,11 @@ namespace WDT
             Assert.IsNotNull(m_layoutElement);
         }
 
+        internal override string GetElemType(int i)
+        {
+            return bindDataTable.GetColumnType(i);
+        }
+
         private void ScrollCellContent(object info)
         {
             WDataTable.RowElementInfo rei = (WDataTable.RowElementInfo) info;

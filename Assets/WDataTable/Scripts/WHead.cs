@@ -51,5 +51,10 @@ namespace WDT
 
             UpdateHeadSize();
         }
+
+        internal override string GetElemType(int i)
+        {
+            return "ButtonElement";
+        }
     }
 }
