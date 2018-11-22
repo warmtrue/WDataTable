@@ -10,18 +10,30 @@ namespace WDT
         private HorizontalLayoutGroup m_hLayoutGroup;
         private RectTransform m_rectTransform;
 
-        protected override void InitContainter(string prefabName)
+        protected override void InitContainter()
         {
-            base.InitContainter(prefabName);
+            base.InitContainter();
             m_rectTransform = GetComponent<RectTransform>();
             m_hLayoutGroup = GetComponent<HorizontalLayoutGroup>();
             Assert.IsNotNull(m_rectTransform);
             Assert.IsNotNull(m_hLayoutGroup);
         }
 
+        protected override string GetObjectName(int columnIndex)
+        {
+            if (bindDataTable == null || columnsDefs.Count <= 0)
+                return "";
+
+            if (columnIndex < 0 || columnIndex >= columnsDefs.Count)
+                return "";
+
+            string objectName = columnsDefs[columnIndex].headPrefabName;
+            return string.IsNullOrEmpty(objectName) ? bindDataTable.defaultHeadPrefabName : objectName;
+        }
+
         public void UpdateHeadSize()
         {
-            if (bindDataTable == null || columnSize <= 0)
+            if (bindDataTable == null || columnsDefs.Count <= 0)
                 return;
 
             m_rectTransform.sizeDelta = new Vector2(bindDataTable.tableWidth, bindDataTable.itemHeight);
@@ -31,30 +43,21 @@ namespace WDT
             }
         }
 
-        public void SetColumnInfo(IList<string> columns, WDataTable dataTable)
+        public void SetColumnInfo(IList<WColumnDef> columnsDefsIn, WDataTable dataTable)
         {
             bindDataTable = dataTable;
             if (!init)
-                InitContainter(bindDataTable.headElementPrefab);
+                InitContainter();
 
-            int size = columns.Count;
-            if (columnSize != size)
-            {
-                columnSize = size;
-                BuildChild();
-            }
+            columnsDefs = columnsDefsIn;
+            BuildChild();
 
             for (int i = 0; i < elements.Count; i++)
             {
-                elements[i].SetInfo(columns[i], -1, i, bindDataTable);
+                elements[i].SetInfo(columnsDefs[i].name, -1, i, bindDataTable);
             }
 
             UpdateHeadSize();
-        }
-
-        internal override string GetElemType(int i)
-        {
-            return "ButtonElement";
         }
     }
 }

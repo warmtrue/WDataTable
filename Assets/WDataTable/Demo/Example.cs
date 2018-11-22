@@ -20,12 +20,20 @@ public class Example : MonoBehaviour
     {
         m_columns = new List<string>();
         m_datas = new List<IList<object>>();
-        m_columnDefs = new List<WColumnDef>();
-        m_columnDefs.Add(new WColumnDef() { name = "ID", width = "40"});
-        m_columnDefs.Add(new WColumnDef() { name = "A", elemType = ElemType.BUTTON});
-        m_columnDefs.Add(new WColumnDef() { name = "B" });
-        m_columnDefs.Add(new WColumnDef() { name = "C" });
-        m_columnDefs.Add(new WColumnDef() { name = "D", width = "50%", disableSort = true});
+        // name is necessary in columnDefs
+        m_columnDefs = new List<WColumnDef>
+        {
+            new WColumnDef() {name = "ID", width = "40"},
+            new WColumnDef()
+            {
+                name = "A",
+                elementPrefabName = "ButtonElement",
+                headPrefabName = "TextElement"
+            },
+            new WColumnDef() {name = "B"},
+            new WColumnDef() {name = "C"},
+            new WColumnDef() {name = "D", width = "50%", disableSort = true}
+        };
 
         for (int i = 0; i < 30; i++)
         {
@@ -45,10 +53,10 @@ public class Example : MonoBehaviour
             WElement element = args[2] as WElement;
             if (element == null)
                 return;
-            Text text = element.GetComponent<Text>();
-            if (text == null)
+            Text tText = element.GetComponent<Text>();
+            if (tText == null)
                 return;
-            text.color = columnIndex % 2 == 0 ? Color.blue : Color.red;
+            tText.color = columnIndex % 2 == 0 ? Color.blue : Color.red;
         }
         else if (messageType == WEventType.SELECT_ROW)
         {
@@ -74,13 +82,13 @@ public class Example : MonoBehaviour
     public void AddRow()
     {
         m_datas.Add(GetRandomData());
-        dataTable.UpdateData(m_datas, null);
+        dataTable.UpdateData(m_datas);
     }
 
     public void InsertRow(int index)
     {
         m_datas.Insert(index, GetRandomData());
-        dataTable.UpdateData(m_datas, null);
+        dataTable.UpdateData(m_datas);
     }
 
     public void RemoveRow(int index)
@@ -89,7 +97,7 @@ public class Example : MonoBehaviour
             return;
 
         m_datas.RemoveAt(index);
-        dataTable.UpdateData(m_datas, null);
+        dataTable.UpdateData(m_datas);
     }
 
     public void RemoveSelectRow()
@@ -104,20 +112,8 @@ public class Example : MonoBehaviour
         float oldPostion = dataTable.GetPosition();
         m_datas.RemoveAt(m_tempSelectIndex);
         int newSize = m_datas.Count;
-        dataTable.UpdateData(m_datas, null);
+        dataTable.UpdateData(m_datas);
         dataTable.SetPosition(dataTable.GetPositionByNewSize(oldPostion, oldSize, newSize));
-    }
-
-    public void RemoveColumn(int index)
-    {
-        if (m_columns.Count == 0)
-            return;
-
-        m_columns.RemoveAt(index);
-        foreach (var subData in m_datas)
-            subData.RemoveAt(index);
-
-        dataTable.UpdateData(m_datas, m_columns);
     }
 
     private void Update()

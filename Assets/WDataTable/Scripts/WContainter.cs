@@ -1,22 +1,30 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.UI;
 
 namespace WDT
 {
     public abstract class WContainter : MonoBehaviour
     {
-        protected int columnSize = -1;
+        protected IList<WColumnDef> columnsDefs;
         protected readonly List<WElement> elements = new List<WElement>();
         protected WDataTable bindDataTable;
         protected bool init;
-        private string m_prefabName;
+        private readonly List<string> m_initPoolNames = new List<string>();
 
-        protected virtual void InitContainter(string prefabName)
+        private GameObject GetObject(string prefabName)
         {
-            m_prefabName = prefabName;
-            //SG.ResourceManager.Instance.InitPool(m_prefabName, 0);
+            if (!m_initPoolNames.Contains(prefabName))
+            {
+                SG.ResourceManager.Instance.InitPool(prefabName, 0);
+                m_initPoolNames.Add(prefabName);
+            }
+
+            return SG.ResourceManager.Instance.GetObjectFromPool(prefabName);
+        }
+
+        protected virtual void InitContainter()
+        {
             SG.ResourceManager.Instance.InitPool("ButtonElement", 0);
             SG.ResourceManager.Instance.InitPool("TextElement", 0);
             foreach (Transform child in transform)
@@ -26,13 +34,16 @@ namespace WDT
 
         protected void BuildChild()
         {
+            if (columnsDefs == null)
+                return;
+
             foreach (WElement element in elements)
                 SG.ResourceManager.Instance.ReturnObjectToPool(element.gameObject);
             elements.Clear();
 
-            for (int i = 0; i < columnSize; i++)
+            for (int i = 0; i < columnsDefs.Count; i++)
             {
-                GameObject go = SG.ResourceManager.Instance.GetObjectFromPool(GetElemType(i));
+                GameObject go = GetObject(GetObjectName(i));
                 go.transform.SetParent(transform, false);
                 WElement element = go.GetComponent<WElement>();
                 Assert.IsNotNull(element);
@@ -40,6 +51,6 @@ namespace WDT
             }
         }
 
-        internal abstract string GetElemType(int i);
+        protected abstract string GetObjectName(int columnIndex);
     }
 }

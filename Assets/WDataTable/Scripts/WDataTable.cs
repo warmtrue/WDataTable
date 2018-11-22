@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -17,17 +16,12 @@ namespace WDT
         EVENT_COUNT,
     }
 
-    public enum ElemType
-    {
-        BUTTON,
-        TEXT,
-    }
-
     public class WColumnDef
     {
         public string name;
-        public ElemType elemType = ElemType.TEXT;
-        public string width = "";
+        public string headPrefabName;
+        public string elementPrefabName;
+        public string width;
         public bool disableSort;
     }
 
@@ -39,6 +33,7 @@ namespace WDT
         {
             public int rowIndex;
             public WDataTable bindDataTable;
+            public IList<WColumnDef> columnsDefs;
         }
 
         private class SortItem
@@ -53,24 +48,11 @@ namespace WDT
             public readonly object item;
         }
 
-        internal string GetColumnType(int i)
-        {
-            switch(m_columnDefs[i].elemType)
-            {
-                case ElemType.BUTTON:
-                    return "ButtonElement";
-                case ElemType.TEXT:
-                    return "TextElement";
-                default:
-                    throw new ArgumentException();
-            }
-        }
-
         [HideInInspector] public event WMsgHandle MsgHandle;
 
         public string rowPrefab;
-        public string headElementPrefab;
-        public string rowElementPrefab;
+        public string defaultHeadPrefabName;
+        public string defaultElementPrefabName;
         public int itemHeight;
         public int tableWidth;
         public int tableHeight;
@@ -82,7 +64,6 @@ namespace WDT
         private RectTransform m_scrollRectTransform;
         private RectTransform m_scrollbarRectTransform;
         private IList<IList<object>> m_datas = new List<IList<object>>();
-        private IList<string> m_columns = new List<string>();
         private IList<WColumnDef> m_columnDefs = new List<WColumnDef>();
         private readonly IList<RowElementInfo> m_rowInfos = new List<RowElementInfo>();
         private readonly IList<int> m_columnWidths = new List<int>();
@@ -124,7 +105,7 @@ namespace WDT
         /// <param name="columnIndex">The index.</param>
         public void SortByIndex(int columnIndex)
         {
-            if (columnIndex < 0 || columnIndex >= m_columns.Count)
+            if (columnIndex < 0 || columnIndex >= m_columnDefs.Count)
                 return;
 
             if (m_rowInfos.Count == 0 || !(m_datas[0][columnIndex] is IComparable))
@@ -156,10 +137,9 @@ namespace WDT
         /// update data of the data table. need ensure right data
         /// </summary>
         /// <param name="datas">The datas.</param>
-        /// <param name="columns">The columns.</param>
-        public void UpdateData(IList<IList<object>> datas, IList<string> columns)
+        public void UpdateData(IList<IList<object>> datas)
         {
-            if (datas == null && columns == null)
+            if (datas == null)
                 return;
 
             if (!m_init)
@@ -169,33 +149,16 @@ namespace WDT
             }
 
             IList<IList<object>> tDatas = datas;
-            IList<string> tColumns = columns;
-            if (tDatas == null)
-                tDatas = m_datas;
-
-            if (tColumns == null)
-                tColumns = m_columns;
-
             if (!CheckInputData(tDatas, m_columnDefs))
                 return;
 
             if (!CheckConfig())
                 return;
 
-            if (datas != null)
-            {
-                m_datas = datas;
-                m_rowInfos.Clear();
-                for (int i = 0; i < m_datas.Count; i++)
-                    m_rowInfos.Add(new RowElementInfo {rowIndex = i, bindDataTable = this});
-            }
-
-            if (columns != null)
-            {
-                m_columns = new List<string>(columns);
-                UpdateColumnWidths();
-                m_head.SetColumnInfo(m_columns, this);
-            }
+            m_datas = datas;
+            m_rowInfos.Clear();
+            for (int i = 0; i < m_datas.Count; i++)
+                m_rowInfos.Add(new RowElementInfo {rowIndex = i, bindDataTable = this, columnsDefs = m_columnDefs});
 
             UpdateByRowInfo();
         }
@@ -204,9 +167,8 @@ namespace WDT
         /// Initializes the data table. need ensure right data
         /// </summary>
         /// <param name="datas">The datas.</param>
-        /// <param name="columns">The columns.</param>
         /// <param name="columnDefs"></param>
-        public void InitDataTable(IList<IList<object>> datas, IList<WColumnDef> columnDefs = null)
+        public void InitDataTable(IList<IList<object>> datas, IList<WColumnDef> columnDefs)
         {
             if (!CheckInputData(datas, columnDefs))
                 return;
@@ -222,12 +184,10 @@ namespace WDT
             m_columnDefs = columnDefs;
             m_rowInfos.Clear();
             for (int i = 0; i < m_datas.Count; i++)
-                m_rowInfos.Add(new RowElementInfo {rowIndex = i, bindDataTable = this});
-            m_columns = (from x in m_columnDefs
-                         select x.name).ToList();
+                m_rowInfos.Add(new RowElementInfo {rowIndex = i, bindDataTable = this, columnsDefs = m_columnDefs});
 
             UpdateColumnWidths();
-            m_head.SetColumnInfo(m_columns, this);
+            m_head.SetColumnInfo(m_columnDefs, this);
             m_scrollRect.prefabSource.prefabName = rowPrefab;
             UpdateScrollRectSize();
             UpdateByRowInfo();
@@ -295,7 +255,7 @@ namespace WDT
             if (m_columnDefs == null)
                 return true;
 
-            if (columnIndex < 0 || columnIndex >= m_columns.Count)
+            if (columnIndex < 0 || columnIndex >= m_columnDefs.Count)
                 return false;
 
             if (m_columnDefs[columnIndex] == null)
@@ -321,22 +281,25 @@ namespace WDT
 
         private void UpdateColumnWidths()
         {
+            if (m_columnDefs == null)
+                return;
+
             m_columnWidths.Clear();
             if (m_columnDefs == null || m_columnDefs.Count == 0)
             {
-                for (int i = 0; i < m_columns.Count; i++)
+                for (int i = 0; i < m_columnDefs.Count; i++)
                 {
-                    m_columnWidths.Add(tableWidth / m_columns.Count);
+                    m_columnWidths.Add(tableWidth / m_columnDefs.Count);
                 }
             }
             else
             {
                 int totalWidth = 0;
                 int totalCount = 0;
-                for (int i = 0; i < m_columns.Count; i++)
+                for (int i = 0; i < m_columnDefs.Count; i++)
                 {
                     int width = 0;
-                    if (m_columnDefs[i] != null)
+                    if (m_columnDefs[i] != null && !string.IsNullOrEmpty(m_columnDefs[i].width))
                     {
                         if (m_columnDefs[i].width.Contains('%'))
                         {
@@ -359,9 +322,9 @@ namespace WDT
                     }
                 }
 
-                if (totalCount < m_columns.Count)
+                if (totalCount < m_columnDefs.Count)
                 {
-                    int otherWidth = (tableWidth - totalWidth) / (m_columns.Count - totalCount);
+                    int otherWidth = (tableWidth - totalWidth) / (m_columnDefs.Count - totalCount);
                     if (otherWidth <= 0)
                         Debug.LogError("Error columnDef for calculate column width");
 
@@ -396,18 +359,6 @@ namespace WDT
                 return false;
             }
 
-            if (string.IsNullOrEmpty(headElementPrefab))
-            {
-                Debug.LogError("need set headElementPrefab name");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(rowElementPrefab))
-            {
-                Debug.LogError("need set rowElementPrefab name");
-                return false;
-            }
-
             if (itemHeight <= 0 || tableWidth <= 0 || tableHeight <= 0)
             {
                 Debug.LogError("size number greater than zero");
@@ -423,8 +374,14 @@ namespace WDT
             return true;
         }
 
-        private static bool CheckInputData(IList<IList<object>> datas, ICollection<WColumnDef> columnDefs)
+        private bool CheckInputData(IList<IList<object>> datas, ICollection<WColumnDef> columnDefs)
         {
+            if (datas == null || columnDefs == null)
+            {
+                Debug.LogError("datas columnDefs not be null");
+                return false;
+            }
+
             if (datas.Count == 0)
             {
                 Debug.LogError("empty data");
@@ -436,6 +393,27 @@ namespace WDT
                 if (datas[i].Count != columnDefs.Count)
                 {
                     Debug.LogError("row data length not equal columns length:" + i);
+                    return false;
+                }
+            }
+
+            foreach (var column in columnDefs)
+            {
+                if (string.IsNullOrEmpty(column.name))
+                {
+                    Debug.LogError("columnDefs need contain column name");
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(defaultHeadPrefabName) && string.IsNullOrEmpty(column.headPrefabName))
+                {
+                    Debug.LogError("if defaultHeadPrefabName is empty, columnDefs need contain headPrefabName");
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(defaultElementPrefabName) && string.IsNullOrEmpty(column.elementPrefabName))
+                {
+                    Debug.LogError("if defaultElementPrefabName is empty, columnDefs need contain elementPrefabName");
                     return false;
                 }
             }

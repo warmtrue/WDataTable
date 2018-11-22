@@ -371,8 +371,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rowPrefab: RowCotainter
-  headElementPrefab: ButtonElement
-  rowElementPrefab: TextElement
+  defaultHeadPrefabName: ButtonElement
+  defaultElementPrefabName: TextElement
   itemHeight: 20
   tableWidth: 600
   tableHeight: 100

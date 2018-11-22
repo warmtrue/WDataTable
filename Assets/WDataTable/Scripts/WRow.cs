@@ -12,9 +12,8 @@ namespace WDT
         private LayoutElement m_layoutElement;
         private Button m_button;
 
-        protected override void InitContainter(string prefabName)
+        protected override void InitContainter()
         {
-            base.InitContainter(prefabName);
             m_rectTransform = GetComponent<RectTransform>();
             m_layoutElement = GetComponent<LayoutElement>();
             m_button = GetComponent<Button>();
@@ -23,9 +22,16 @@ namespace WDT
             Assert.IsNotNull(m_layoutElement);
         }
 
-        internal override string GetElemType(int i)
+        protected override string GetObjectName(int columnIndex)
         {
-            return bindDataTable.GetColumnType(i);
+            if (bindDataTable == null || columnsDefs.Count <= 0)
+                return "";
+
+            if (columnIndex < 0 || columnIndex >= columnsDefs.Count)
+                return "";
+
+            string objectName = columnsDefs[columnIndex].elementPrefabName;
+            return string.IsNullOrEmpty(objectName) ? bindDataTable.defaultElementPrefabName : objectName;
         }
 
         private void ScrollCellContent(object info)
@@ -33,15 +39,12 @@ namespace WDT
             WDataTable.RowElementInfo rei = (WDataTable.RowElementInfo) info;
             bindDataTable = rei.bindDataTable;
             IList<object> infos = bindDataTable.GetInfosByRowIndex(rei.rowIndex);
+            columnsDefs = rei.columnsDefs;
 
             if (!init)
-                InitContainter(bindDataTable.rowElementPrefab);
+                InitContainter();
 
-            if (columnSize != infos.Count)
-            {
-                columnSize = infos.Count;
-                BuildChild();
-            }
+            BuildChild();
 
             m_rectTransform.sizeDelta = new Vector2(bindDataTable.tableWidth, bindDataTable.itemHeight);
             m_layoutElement.preferredHeight = bindDataTable.itemHeight;
