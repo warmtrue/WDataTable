@@ -8,9 +8,9 @@ public class Example : MonoBehaviour
 {
     public WDataTable dataTable;
     public bool testDynamic;
+    public bool testTextMeshPro;
     public Text text;
 
-    private IList<string> m_columns = null;
     private List<IList<object>> m_datas = null;
     private List<WColumnDef> m_columnDefs = null;
     private int m_tempSelectIndex = -1;
@@ -18,7 +18,6 @@ public class Example : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        m_columns = new List<string>();
         m_datas = new List<IList<object>>();
         // name is necessary in columnDefs
         m_columnDefs = new List<WColumnDef>
@@ -40,7 +39,12 @@ public class Example : MonoBehaviour
             m_datas.Add(GetRandomData(i));
         }
 
-        dataTable.MsgHandle += HandleTableEvent;
+        if (testTextMeshPro)
+        {
+            dataTable.defaultHeadPrefabName = "TMPButtonElement";
+            dataTable.defaultElementPrefabName = "TMPTextElement";
+        }
+        dataTable.msgHandle += HandleTableEvent;
         dataTable.InitDataTable(m_datas, m_columnDefs);
     }
 

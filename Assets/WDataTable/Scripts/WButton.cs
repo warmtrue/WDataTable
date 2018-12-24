@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
+#if WDT_USE_TMPRO
+using TMPro;
+
+#endif
 
 namespace WDT
 {
@@ -8,6 +12,9 @@ namespace WDT
     {
         private Button m_button;
         private Text m_text;
+#if WDT_USE_TMPRO
+        private TextMeshProUGUI m_tmpText;
+#endif
         private LayoutElement m_layoutElement;
         private RectTransform m_rectTransform;
 
@@ -16,10 +23,12 @@ namespace WDT
             base.InitElement();
             m_button = GetComponent<Button>();
             m_text = GetComponentInChildren<Text>();
+#if WDT_USE_TMPRO
+            m_tmpText = GetComponentInChildren<TextMeshProUGUI>();
+#endif
             m_layoutElement = GetComponent<LayoutElement>();
             m_rectTransform = GetComponent<RectTransform>();
             Assert.IsNotNull(m_button);
-            Assert.IsNotNull(m_text);
             Assert.IsNotNull(m_layoutElement);
         }
 
@@ -32,7 +41,12 @@ namespace WDT
         public override void SetInfo(object info, int rowIndex, int columnIndex, WDataTable dataTable)
         {
             base.SetInfo(info, rowIndex, columnIndex, dataTable);
-            m_text.text = info.ToString();
+            if (m_text != null)
+                m_text.text = info.ToString();
+#if WDT_USE_TMPRO
+            if (m_tmpText != null)
+                m_tmpText.text = info.ToString();
+#endif
             m_button.onClick.RemoveAllListeners();
             if (bindDataTable.CanSortByColumnIndex(columnIndex))
                 m_button.onClick.AddListener(() => { bindDataTable.OnClickButton(rowIndex, columnIndex); });

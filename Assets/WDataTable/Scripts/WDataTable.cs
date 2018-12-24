@@ -48,7 +48,7 @@ namespace WDT
             public readonly object item;
         }
 
-        [HideInInspector] public event WMsgHandle MsgHandle;
+        [HideInInspector] public WMsgHandle msgHandle;
 
         public string rowPrefab;
         public string defaultHeadPrefabName;
@@ -129,8 +129,8 @@ namespace WDT
 
             UpdateByRowInfo();
 
-            if (MsgHandle != null)
-                MsgHandle(WEventType.SORT_BY_COLUMN, columnIndex);
+            if (msgHandle != null)
+                msgHandle(WEventType.SORT_BY_COLUMN, columnIndex);
         }
 
         /// <summary>
@@ -204,8 +204,8 @@ namespace WDT
         public void OnClickRow(int rowIndex)
         {
             Debug.Log("clicked rowIndex" + rowIndex);
-            if (MsgHandle != null)
-                MsgHandle(WEventType.SELECT_ROW, rowIndex);
+            if (msgHandle != null)
+                msgHandle(WEventType.SELECT_ROW, rowIndex);
         }
 
         public void OnClickColumn(int columnIndex)
@@ -214,8 +214,8 @@ namespace WDT
                 SortByIndex(columnIndex);
 
             Debug.Log("clicked columnIndex " + columnIndex);
-            if (MsgHandle != null)
-                MsgHandle(WEventType.SELECT_COLUMN, columnIndex);
+            if (msgHandle != null)
+                msgHandle(WEventType.SELECT_COLUMN, columnIndex);
         }
 
         public void OnClickButton(int rowIndex, int columnIndex)
@@ -227,8 +227,8 @@ namespace WDT
 
         public void OnInitElement(int rowIndex, int columnIndex, WElement element)
         {
-            if (MsgHandle != null)
-                MsgHandle(WEventType.INIT_ELEMENT, rowIndex, columnIndex, element);
+            if (msgHandle != null)
+                msgHandle(WEventType.INIT_ELEMENT, rowIndex, columnIndex, element);
         }
 
         [ContextMenu("UpdateSize")]
